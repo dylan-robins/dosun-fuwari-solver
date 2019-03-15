@@ -8,4 +8,4 @@ def test_sat():
         print(x)
 
 if __name__ == "__main__":
-    test_sat();
+    test_sat()

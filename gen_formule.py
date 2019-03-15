@@ -1,16 +1,126 @@
 #!venv/bin/python
 import itertools
+import pycosat as sat
 
 
-def gen_fnc(width, height, zones, blacks):
+def make_each_negative_once(zone, gridWidth, mode, offset=3):
+    """
+    List conditions determining the unicity of balloons or stones in a given zone.
+
+    Arguments:
+      - zone: list of cells in zone
+              Format:
+              [
+                  (x1,y1),
+                  (x2,y2),
+                  (x3,y3),
+                  ...
+              ]
+      - mode: Determines whether to make clauses for unicitiy of balloons or
+              stones. 0 => balloons, 1 => stones
+    """
+    condition = []
+    for cell in zone:
+        # Cell's number is it's x index + it's y index times the width of the
+        # grid + the "mode" (offset numbers by 1 if making conditions for
+        # stones) + the initial numbering offset
+        i = 3 * (cell[0] + cell[1] * gridWidth) + mode + offset
+        condition = [-i]
+        for other_cell in zone:
+            j = 3 * (other_cell[0] + other_cell[1] * gridWidth) + mode + offset
+            if i != j:
+                condition.append(j)
+        yield condition
+
+
+def gen_ncf(width, height, zones, blacks):
+    """
+    Generates the normal conjuntive form giving the satisfiability of a given
+    dosun fuwari grid. Output format is a pycosat-compliant DIMACS list.
+
+    Arguments:
+        - width: width of the grid
+        - height: height of the grid
+        - zones: list of the zones in the grid
+                 Expected format: 
+                 [
+                    [(x1, y1), (x2,y2), ...],
+                    [(x3, y3), (x4,y4), ...], 
+                    ...
+                 ]
+        - blacks: list of the black cells in the grid
+                  Expected format:
+                  [
+                    (x1,y1),
+                    (x2,y2),
+                    ...
+                  ]
+
+    Logic rules:
+        Each cell of the grid has three variables attached to it: isStone,
+        isBalloon and isBlack. For a given cell (x, y) of the grid belonging
+        to a given zone [(x,y), (xz1, yz1), (xz2, yz2)...], the
+        rules determining whether the cell is legal are the following:
+          - Each stone must be resting against a black cell or another
+            stone beneath it:
+                isStone(x,y) => isBlack(x, y+1) or isStone(x, y+1)
+          - Each balloon must be resting against a black cell or another
+            balloon above it:
+                isBalloon(x,y) => isBlack(x, y-1) or isBalloon(x, y-1)
+          - Each zone must have one (and only one) stone in it:
+                isStone(x,y) and not isStone(xz1, yz1) and not
+                isStone(xz2, yz2) and not isStone...
+          - Each zone must have one (and only one) balloon in it:
+                isBalloon(x,y) and not isBalloon(xz1, yz1) and not
+                isBalloon(xz2, yz2) and not isBalloon...
+    
+    DIMACS variable naming convention:
+        Variables numbers are assigned in groups of three going across each 
+        row, top to bottom, starting from 3 (-0 is not distinct from 0, so 
+        numbers 0 through 3 can cause problems)
+        So 3, 4 and 5 are respectively isBallon(), isStone() and isBlack(0,0),
+        then 6 is isBallon(1,0), 7 is isStone(1,0) etc.
+        Visual example:
+         ________________________________
+        |          |          |          |
+        |  3,4,5   |  6,7,8   | 9,10,11  |
+        |__________|__________|__________|
+        |          |          |          |
+        | 12,13,14 | 15,16,17 | 18,19,20 |
+        |__________|__________|__________|
+        |          |          |          |
+        | 21,22,23 | 24,25,26 | 27,28,29 |
+        |__________|__________|__________|
+    """
     ncf = []
-    # 3 boolean variables per cell:
-    # 1*i = B(x,y); 2*i = P(x,y); 3*i = N(x,y)
-    i = 1
-    for y in range(height):
-        for x in range(width):
-            ncf.append([-1 * i, 3 * (i - width), 1 * (i - width)])
-            i += 1
+    # isStone positional conditions
+    # End on row height-1 since bottom row is always resting on the bottom of
+    # the grid
+    i = 3 * width + 3
+    for _ in range(0, height - 1):
+        for _ in range(0, width):
+            # not isStone(x,y) or isStone(x,y-1) or isBlack(x,y-1)
+            ncf.append([-i, i - 3 * width, i - 3 * width + 2])
+            i += 3  # go to next cell
+    # isBalloon positional conditions
+    # Start on row 1 since top row is always resting against top of grid
+    i = 3
+    for _ in range(1, height):
+        for _ in range(0, width):
+            # not isBalloon(x,y) or isBalloon(x,y-1) or isBlack(x,y-1)
+            ncf.append([-(i + 1), i + 3 * width + 1, i + 3 * width + 2])
+            i += 3  # go to next cell
+
+    # Zone unicity conditions
+    for zone in zones:
+        # Each cell could be a balloon
+        for clause in itertools.product(
+            *[not_a_clause for not_a_clause in make_each_negative_once(zone, width, 0)]
+        ):
+            # not_a_clause is similar to a DIMACS list except it's elements are
+            # seperated by ands instead of ors. We have to do distibute it's
+            # terms with itertools.product in order to get clauses
+            ncf.append(list(clause))
     return ncf
 
 
@@ -31,8 +141,7 @@ def generate_formula(width, height, zones, blacks):
     # ajouter (il existe une unique case (x,y) dans zi telle que B(x,y))
     #      et (il existe une unique case (x',y') dans zi telle que P(x',y'))
     for zone in zones:
-        # Creer deux ensembles avec les bouts de formule à racoller
-        # (ensemble = set = liste sans éléments dupliqués)
+        # Creer deux listes avec les bouts de formule à racoller
         ballons = []
         pierres = []
         for perm in itertools.permutations(zone):
@@ -51,9 +160,9 @@ def generate_formula(width, height, zones, blacks):
         # Convertir les listes en clauses
         # Et les ajouter à la formule
         for clause in itertools.product(*ballons):
-            formula +="(" + "+".join(clause) + ")\n"
+            formula += "(" + "+".join(clause) + ")\n"
         for clause in itertools.product(*pierres):
-            formula +="(" + "+".join(clause) + ")\n"
+            formula += "(" + "+".join(clause) + ")\n"
         # formula += (
         #     "(" + "+".join(["(" + "*".join(perm) + ")" for perm in ballons]) + ")\n"
         # )
@@ -61,6 +170,8 @@ def generate_formula(width, height, zones, blacks):
         #     "(" + "+".join(["(" + "*".join(perm) + ")" for perm in pierres]) + ")\n"
         # )
     print(formula)
+
+
 if __name__ == "__main__":
     #######################
     #     exemple 2x2     #
@@ -75,13 +186,9 @@ if __name__ == "__main__":
     #######################
     #     exemple 3x3     #
     #######################
-    x,y = 3,3
-    zones = [
-        [(0,0), (1,0)],
-        [(2,0), (2,1), (2,2)],
-        [(1,1),(1,2),(0,2)]
-    ]
-    blacks = [(0,1)]
+    x, y = 3, 3
+    zones = [[(0, 0), (1, 0)], [(2, 0), (2, 1), (2, 2)], [(1, 1), (1, 2), (0, 2)]]
+    blacks = [(0, 1)]
 
     #######################
     #    exemple 10x10    #
@@ -301,7 +408,11 @@ if __name__ == "__main__":
     # ]
 
     # generate_formula(x, y, zones, blacks)
-    generate_formula(x, y, zones, blacks)
 
-    # print(gen_fnc(x,y, zones, blacks))
+    for clause in gen_ncf(x,y, zones, blacks):
+        print(clause)
 
+    # clauses = gen_ncf(x, y, zones, blacks)
+    # res = sat.itersolve(clauses)
+    # for solution in res:
+    #     print(solution)
