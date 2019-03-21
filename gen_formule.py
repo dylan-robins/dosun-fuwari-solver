@@ -1,6 +1,6 @@
 #!venv/bin/python
 import itertools
-import pycosat as sat
+# import pycosat as sat
 
 
 def make_each_negative_once(zone, gridWidth, mode, offset=3):
@@ -125,12 +125,25 @@ def gen_ncf(width, height, zones, blacks):
 
 
 def generate_formula(width, height, zones, blacks):
-    # print(f"Grid size: {width}x{height}")
-    # print("zones: ", end="")
-    # print(zones)
-    # print("black cells: ", end="")
-    # print(blacks, "\n")
+    '''
+    Same as gen_ncf(): generates the normal conjuntive form giving the
+    satisfiability of a given dosun fuwari grid. Output format is a human
+    readable logic formula.
+    '''
     formula = ""
+    # Pour chaque case définir si elle est noire ou non
+    for y in range(height):
+        for x in range(width):
+            if (x,y) in blacks:
+                formula += f"(N({x},{y}))"
+                # une case noire ne peut pas contenir de ballon ou de pierre
+                formula += f"(-B({x},{y}))(-P({x},{y}))\n"
+            else:
+                formula += f"(-N({x},{y}))\n"
+    # Définir que chaque case ne peut contenir à la fois un ballon et une pierre
+    for y in range(height):
+        for x in range(width):
+            formula += f"(-B({x},{y})+-P({x},{y}))\n"
     # 1e partie: pour chaque case (x,y) de la grille
     # ajouter B(x,y) => N(x,y-1) + B(x,y-1) et P(x,y) => N(x,y-1) + P(x,y-1)
     for y in range(height):
@@ -163,13 +176,7 @@ def generate_formula(width, height, zones, blacks):
             formula += "(" + "+".join(clause) + ")\n"
         for clause in itertools.product(*pierres):
             formula += "(" + "+".join(clause) + ")\n"
-        # formula += (
-        #     "(" + "+".join(["(" + "*".join(perm) + ")" for perm in ballons]) + ")\n"
-        # )
-        # formula += (
-        #     "(" + "+".join(["(" + "*".join(perm) + ")" for perm in pierres]) + ")\n"
-        # )
-    print(formula)
+    return formula
 
 
 if __name__ == "__main__":
@@ -407,10 +414,10 @@ if __name__ == "__main__":
     #     [(6, 19), (7, 19)],
     # ]
 
-    # generate_formula(x, y, zones, blacks)
+    print(generate_formula(x, y, zones, blacks))
 
-    for clause in gen_ncf(x,y, zones, blacks):
-        print(clause)
+    # for clause in gen_ncf(x,y, zones, blacks):
+    #     print(clause)
 
     # clauses = gen_ncf(x, y, zones, blacks)
     # res = sat.itersolve(clauses)
