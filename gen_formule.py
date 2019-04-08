@@ -121,7 +121,7 @@ def gen_ncf(width, height, zones, blacks):
     i = 12
     for y in range(height):
         for x in range(width):
-            if (x,y) in blacks:
+            if [x,y] in blacks:
                 ncf.append([i+2])    # (x,y) is black
                 ncf.append([-i])     # (x,y) can't hold a balloon
                 ncf.append([-(i+1)]) # (x,y) can't hold a stone
