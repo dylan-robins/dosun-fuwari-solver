@@ -16,8 +16,8 @@ The solver is currently split in three parts: `gui.py` is the graphical grid cre
 ## To do
 
 + Fix `gen_ncf()`:
-    + **[BUG]** Clauses contain variables numbered 0 (illegal for pycosat)
-    + **[BUG]** Line 135 is wrong: we're generating *not isBalloon AND not isStone* instead of *not isBalloon OR not isStone*
+    + **[BUG]** Clauses contain variables numbered 0 (illegal for pycosat)  //WIP
+    + **[BUG]** Line 135 is wrong: we're generating *not isBalloon AND not isStone* instead of *not isBalloon OR not isStone*   //false
 + [Feature] Merge scripts into one coherent program
 + [Feature] Add functions to export/import DIMACS files
 + [Feature] Add GUI to save/load grids/DIMACS files
