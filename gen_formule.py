@@ -88,7 +88,7 @@ def gen_ncf(width, height, zones, blacks):
 		14 : (not) isBlack(0,0)
 		etc...
 
-		    3,4,5      6,7,8   	 9,10,11 
+	    3,4,5      6,7,8   	 9,10,11 
          ________________________________
         |          |          |          |		  
         | 12,13,14 | 15,16,17 | 18,19,20 |	 
@@ -100,7 +100,7 @@ def gen_ncf(width, height, zones, blacks):
         | 30,31,32 | 33,34,35 | 36,37,38 |
         |__________|__________|__________|
 
-		  39,40,41   42,43,44  	45,46,47
+	  39,40,41   42,43,44  	45,46,47
 
     """
     ncf = []
@@ -118,10 +118,10 @@ def gen_ncf(width, height, zones, blacks):
         ncf.append([i+2])    # cells below the grid are considered black
 
 	# Add clauses pertaining to the black cells
-    i = 3 + 3 * width		# i = 12 is true only on this example
+    i = 3 + 3 * width
     for y in range(height):
         for x in range(width):
-            if [x,y] in blacks:      # (x,y) => [x,y]
+            if [x,y] in blacks:
                 ncf.append([i+2])    # (x,y) is black
                 ncf.append([-i])     # (x,y) can't hold a balloon
                 ncf.append([-(i+1)]) # (x,y) can't hold a stone
