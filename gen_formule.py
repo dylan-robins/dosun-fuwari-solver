@@ -145,8 +145,8 @@ def gen_ncf(width, height, zones, blacks):
             i += 3  # go to next cell
     # isBalloon positional conditions
     # Start on row 1 since top row is always resting against top of grid
-    i = 3 + 3 * width
-    for _ in range(1, height):
+    i = 3 + 3 * width * 2
+    for _ in range(0, height - 1):	#I changed i and 1st for because otherwise it creates conditions for the top of the grid but not for the bot of it and it's not what we wanted. Now, it create for the bot but not for the top
         for _ in range(0, width):
             # not isBalloon(x,y) or isBalloon(x,y-1) or isBlack(x,y-1)
             ncf.append([-i, i - 3 * width, i - 3 * width + 2])
