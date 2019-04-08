@@ -121,7 +121,7 @@ def gen_ncf(width, height, zones, blacks):
     i = 12
     for y in range(height):
         for x in range(width):
-            if [x,y] in blacks:      # (x,y) => [x,y] : was false because in file it is [x,y]
+            if [x,y] in blacks:      # (x,y) => [x,y]
                 ncf.append([i+2])    # (x,y) is black
                 ncf.append([-i])     # (x,y) can't hold a balloon
                 ncf.append([-(i+1)]) # (x,y) can't hold a stone
@@ -132,7 +132,7 @@ def gen_ncf(width, height, zones, blacks):
 	# A cell can't simultaneously hold a balloon and a stone
     i = 3
     for i in range(3 + 3 * width, 3 * width * height + 3 * width + 3,i):
-        ncf.append([-i, -(i+1)])     # not(isBalloon and isStone) = not isBalloon or not isStone	I'm not okay, it is already not isBalloon or not isStone
+        ncf.append([-i, -(i+1)])     # not(isBalloon and isStone) = not isBalloon or not isStone
 
     # isStone positional conditions
     # End on row height-1 since bottom row is always resting on the bottom of
