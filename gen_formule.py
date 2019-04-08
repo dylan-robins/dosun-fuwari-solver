@@ -118,7 +118,7 @@ def gen_ncf(width, height, zones, blacks):
         ncf.append([i+2])    # cells below the grid are considered black
 
 	# Add clauses pertaining to the black cells
-    i = 12
+    i = 3 + 3 * width		# i = 12 is true only on this example
     for y in range(height):
         for x in range(width):
             if [x,y] in blacks:      # (x,y) => [x,y]
