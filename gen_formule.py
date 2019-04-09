@@ -26,18 +26,18 @@ def make_each_positive_once(zone, gridWidth, mode):
     for i in range(len(zone)):
 	### Function to calculate the first index of each cell in function of its x and y index :
         j = 3 * gridWidth # First indice of the last top row
-        j = j * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode
+        j = j * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode -2
 	###
         condition.append(j)
     yield condition
     #negation
     for i in range(len(zone)-1):
         l = 3 * gridWidth
-        l = l * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode
+        l = l * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode -2
         for k in range(i+1, len(zone)):
             condition = []
             j = 3 * gridWidth
-            j = j * (zone[k][1] + 1) + 3 * (zone[k][0] + zone[k][1] + 1) - gridWidth * zone[k][1] + mode
+            j = j * (zone[k][1] + 1) + 3 * (zone[k][0] + zone[k][1] + 1) - gridWidth * zone[k][1] + mode -2
             condition.append(-l)
             condition.append(-j)
             yield condition
@@ -94,37 +94,37 @@ def gen_ncf(width, height, zones, blacks):
 		14 : (not) isBlack(0,0)
 		etc...
 
-	    3,4,5      6,7,8   	 9,10,11 
+	    1,2,3      4,5,6   	 7,8,9 
          ________________________________
         |          |          |          |		  
-        | 12,13,14 | 15,16,17 | 18,19,20 |	 
+        | 10,11,12 | 13,14,15 | 16,17,18 |	 
         |__________|__________|__________|
         |          |          |          |
-        | 21,22,23 | 24,25,26 | 27,28,29 |	 
+        | 19,20,21 | 22,23,24 | 25,26,27 |	 
         |__________|__________|__________|
         |          |          |          |
-        | 30,31,32 | 33,34,35 | 36,37,38 |
+        | 28,29,30 | 31,32,33 | 34,35,36 |
         |__________|__________|__________|
 
-	  39,40,41   42,43,44  	45,46,47
+	  37,38,39   40,41,42  	43,44,45
 
     """
     ncf = []
 	# Clauses for cells outside of grid (above and below)
     step = 3
     # Cells above
-    for i in range(3, 3 + 3 * width - 1, step):
+    for i in range(1, 1 + 3 * width - 1, step):
         ncf.append([-i])     # cells above the grid can hold a ballon
         ncf.append([-(i+1)]) # cells above the grid can hold a stone
         ncf.append([i+2])    # cells above the grid are considered black
     # Below
-    for i in range(3*width*height+3*width+3, 3*width*height+3*width+3+3*width-1, step):
+    for i in range(3*width*height+3*width+1, 3*width*height+3*width+1+3*width-1, step):
         ncf.append([-i])     # cells below the grid can hold a ballon
         ncf.append([-(i+1)]) # cells below the grid can hold a stone
         ncf.append([i+2])    # cells below the grid are considered black
 
 	# Add clauses pertaining to the black cells
-    i = 3 + 3 * width
+    i = 1 + 3 * width
     for y in range(height):
         for x in range(width):
             if [x,y] in blacks:
@@ -136,14 +136,13 @@ def gen_ncf(width, height, zones, blacks):
             i += 3
 
 	# A cell can't simultaneously hold a balloon and a stone
-    i = 3
-    for i in range(3 + 3 * width, 3 * width * height + 3 * width + 3,i):
+    for i in range(1 + 3 * width, 3 * width * height + 3 * width + 1,3):
         ncf.append([-i, -(i+1)])     # not(isBalloon and isStone) = not isBalloon or not isStone
 
     # isStone positional conditions
     # End on row height-1 since bottom row is always resting on the bottom of
     # the grid
-    i = 3 + 3 * width
+    i = 1 + 3 * width
     for _ in range(0, height - 1):
         for _ in range(0, width):
             # not isStone(x,y) or isStone(x,y+1) or isBlack(x,y+1)
@@ -151,7 +150,7 @@ def gen_ncf(width, height, zones, blacks):
             i += 3  # go to next cell
     # isBalloon positional conditions
     # Start on row 1 since top row is always resting against top of grid
-    i = 3 + 3 * width * 2
+    i = 1 + 3 * width * 2
     for _ in range(0, height - 1):	#I changed i and 1st for because otherwise it creates conditions for the top of the grid but not for the bot of it and it's not what we wanted. Now, it create for the bot but not for the top
         for _ in range(0, width):
             # not isBalloon(x,y) or isBalloon(x,y-1) or isBlack(x,y-1)
