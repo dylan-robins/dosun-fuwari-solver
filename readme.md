@@ -16,7 +16,7 @@ The solver is currently split in three parts: `gui.py` is the graphical grid cre
 ## To do
 
 + Fix `gen_ncf()`:
-    + **[BUG]** Clauses contain variables numbered 0 (illegal for pycosat)  //WIP
+    + **[BUG]** Clauses contain variables numbered 0 (illegal for pycosat)  //WIP : I have found a way to calculate the index of each case of the grid by using x and y index of this case
 + [Feature] Merge scripts into one coherent program
 + [Feature] Add functions to export/import DIMACS files
 + [Feature] Add GUI to save/load grids/DIMACS files
