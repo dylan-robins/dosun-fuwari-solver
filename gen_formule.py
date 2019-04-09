@@ -4,13 +4,11 @@ import file_io as fio
 import pycosat as sat
 
 
-def make_each_positive_once(zone, gridWidth, mode, offset=3):
+def make_each_positive_once(zone, gridWidth, mode):
     """
     Make clauses determining the unicity of balloons or stones in a given
     zone: each cell could be a ballon/stone, but there can be two of them.
-    Output is a list similar to a pycosat-compliant DIMACS list, except it's
-    elements are seperated by ORs instead of ANDs.
-
+    
     Arguments:
       - zone: list of cells in zone
               Format:
@@ -23,18 +21,26 @@ def make_each_positive_once(zone, gridWidth, mode, offset=3):
       - mode: Determines whether to make clauses for unicitiy of balloons or
               stones. 0 => balloons, 1 => stones
     """
+    #non negation
     condition = []
-    for cell in zone:
-        # Variable's number is it's x index + it's y index times the width of
-        # the grid + the "mode" (offset numbers by +1 if making conditions for
-        # stones) + the initial numbering offset
-        i = 3 * (cell[0] + cell[1] * gridWidth) + mode + offset
-        condition = [i]
-        for other_cell in zone:
-            j = -3 * (other_cell[0] + other_cell[1] * gridWidth) + mode + offset
-            if i != j:
-                condition.append(j)
-        yield condition
+    for i in range(len(zone)):
+	### Function to calculate the first index of each case is function of its x and y index :
+        j = 3 * gridWidth # First indice of the last top row
+        j = j * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode
+	###
+        condition.append(j)
+    yield condition
+    #negation
+    for i in range(len(zone)-1):
+        l = 3 * gridWidth
+        l = l * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode
+        for k in range(i+1, len(zone)):
+            condition = []
+            j = 3 * gridWidth
+            j = j * (zone[k][1] + 1) + 3 * (zone[k][0] + zone[k][1] + 1) - gridWidth * zone[k][1] + mode
+            condition.append(-l)
+            condition.append(-j)
+            yield condition
 
 
 def gen_ncf(width, height, zones, blacks):
@@ -154,17 +160,10 @@ def gen_ncf(width, height, zones, blacks):
     # Zone unicity conditions
     for zone in zones:
         # Each cell could be a balloon
-        for clause in itertools.product(
-            *[not_a_clause for not_a_clause in make_each_positive_once(zone, width, 0)]
-        ):
-            # not_a_clause is similar to a DIMACS list except it's elements are
-            # seperated by ands instead of ors. We have to do distibute it's
-            # terms with itertools.product in order to get clauses
+        for clause in (make_each_positive_once(zone, width, 0)):
             ncf.append(list(clause))
-        # Each cell could be a stone
-        for clause in itertools.product(
-            *[not_a_clause for not_a_clause in make_each_positive_once(zone, width, 1)]
-        ):
+	# Each cell could be a stone
+        for clause in (make_each_positive_once(zone, width, 1)):
             ncf.append(list(clause))
     return ncf
 
