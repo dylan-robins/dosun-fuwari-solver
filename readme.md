@@ -16,7 +16,7 @@ The solver is currently split in three parts: `gui.py` is the graphical grid cre
 ## To do
 
 + Fix `gen_ncf()`:
-    + Need to test on zones which have more than 3 cases to see if it matches what we want
+    + Need to test on zones which have more than 3 boxes to see if it confirms what we expected.
 + [Feature] Merge scripts into one coherent program
 + [Feature] Add functions to export/import DIMACS files
 + [Feature] Add GUI to save/load grids/DIMACS files
