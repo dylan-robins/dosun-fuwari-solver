@@ -24,7 +24,7 @@ def make_each_positive_once(zone, gridWidth, mode):
     #non negation
     condition = []
     for i in range(len(zone)):
-	### Function to calculate the first index of each case in function of its x and y index :
+	### Function to calculate the first index of each cell in function of its x and y index :
         j = 3 * gridWidth # First indice of the last top row
         j = j * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode
 	###
