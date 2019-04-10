@@ -24,20 +24,17 @@ def make_each_positive_once(zone, gridWidth, mode):
     #non negation
     condition = []
     for i in range(len(zone)):
-	### Function to calculate the first index of each cell in function of its x and y index :
-        j = 3 * gridWidth # First indice of the last top row
-        j = j * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode -2
+	### Function to calculate the index of each cell in function of its x, y index and mode :
+        j = 3 * gridWidth * (1 + zone[i][1]) + 1 + 3 * zone[i][0] + mode
 	###
         condition.append(j)
     yield condition
     #negation
     for i in range(len(zone)-1):
-        l = 3 * gridWidth
-        l = l * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode -2
+        l = 3 * gridWidth * (1 + zone[i][1]) + 1 + 3 * zone[i][0] + mode
         for k in range(i+1, len(zone)):
             condition = []
-            j = 3 * gridWidth
-            j = j * (zone[k][1] + 1) + 3 * (zone[k][0] + zone[k][1] + 1) - gridWidth * zone[k][1] + mode -2
+            j = 3 * gridWidth * (1 + zone[k][1]) + 1 + 3 * zone[k][0] + mode
             condition.append(-l)
             condition.append(-j)
             yield condition
@@ -168,7 +165,7 @@ def gen_ncf(width, height, zones, blacks):
 
 if __name__ == "__main__":
     # Load a grid from a file and display it
-    grid = fio.read_grid("grid_3x3.json")
+    grid = fio.read_grid("grid_2x2.json")
     print("Grid:")
     print(grid)
 
