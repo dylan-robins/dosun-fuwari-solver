@@ -45,6 +45,7 @@ def make_each_positive_once(zone, gridWidth, mode):
     """
     offset= gridWidth + 1
     condition = []
+<<<<<<< HEAD
     for cell in zone:
         # Variable's number is it's x index + it's y index times the width of
         # the grid + the "mode" (offset numbers by +1 if making conditions for
@@ -57,6 +58,23 @@ def make_each_positive_once(zone, gridWidth, mode):
                 condition.append(j)
         print("#", condition)
         yield condition
+=======
+    for i in range(len(zone)):
+	### Function to calculate the index of each cell in function of its x, y index and mode :
+        j = 3 * gridWidth * (1 + zone[i][1]) + 1 + 3 * zone[i][0] + mode
+	###
+        condition.append(j)
+    yield condition
+    #negation
+    for i in range(len(zone)-1):
+        l = 3 * gridWidth * (1 + zone[i][1]) + 1 + 3 * zone[i][0] + mode
+        for k in range(i+1, len(zone)):
+            condition = []
+            j = 3 * gridWidth * (1 + zone[k][1]) + 1 + 3 * zone[k][0] + mode
+            condition.append(-l)
+            condition.append(-j)
+            yield condition
+>>>>>>> c137e21420a3fb59e3ab079906f8dd28f70d612d
 
 
 def gen_ncf(width, height, zones, blacks):
@@ -178,7 +196,7 @@ def gen_ncf(width, height, zones, blacks):
 
 if __name__ == "__main__":
     # Load a grid from a file and display it
-    grid = fio.read_grid("grid_3x3.json")
+    grid = fio.read_grid("grid_2x2.json")
     print("Grid:")
     print(grid)
 
