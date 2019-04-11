@@ -3,12 +3,34 @@ import itertools
 import file_io as fio
 import pycosat as sat
 
+def interpret_results(clause, gridWidth):
+    x = 0
+    y = 0
+    i = gridWidth*3
+    while i < len(clause)-gridWidth*3:
+        if x >= gridWidth:
+            print("")
+            x = 0
+            y += 1
+        if clause[i] > 0:
+            print("B", end=" ")
+        elif clause[i+1] > 0:
+            print("S", end=" ")
+        elif clause[i+2] > 0:
+            print("N", end=" ")
+        else:
+            print("-", end=" ")
+        i += 3
+        x += 1
+    print("\n________________________________________________________________________________\n")
+    
 
 def make_each_positive_once(zone, gridWidth, mode):
     """
     Make clauses determining the unicity of balloons or stones in a given
     zone: each cell could be a ballon/stone, but there can be two of them.
-    
+    Output is a list similar to a pycosat-compliant DIMACS list, except it's
+    elements are seperated by ORs instead of ANDs.
     Arguments:
       - zone: list of cells in zone
               Format:
@@ -21,26 +43,20 @@ def make_each_positive_once(zone, gridWidth, mode):
       - mode: Determines whether to make clauses for unicitiy of balloons or
               stones. 0 => balloons, 1 => stones
     """
-    #non negation
+    offset= gridWidth + 1
     condition = []
-    for i in range(len(zone)):
-	### Function to calculate the first index of each cell in function of its x and y index :
-        j = 3 * gridWidth # First indice of the last top row
-        j = j * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode -2
-	###
-        condition.append(j)
-    yield condition
-    #negation
-    for i in range(len(zone)-1):
-        l = 3 * gridWidth
-        l = l * (zone[i][1] + 1) + 3 * (zone[i][0] + zone[i][1] + 1) - gridWidth * zone[i][1] + mode -2
-        for k in range(i+1, len(zone)):
-            condition = []
-            j = 3 * gridWidth
-            j = j * (zone[k][1] + 1) + 3 * (zone[k][0] + zone[k][1] + 1) - gridWidth * zone[k][1] + mode -2
-            condition.append(-l)
-            condition.append(-j)
-            yield condition
+    for cell in zone:
+        # Variable's number is it's x index + it's y index times the width of
+        # the grid + the "mode" (offset numbers by +1 if making conditions for
+        # stones) + the initial numbering offset
+        i = 3*(cell[0] + cell[1]*gridWidth) + mode + offset
+        condition = [i]
+        for other_cell in zone:
+            j = -3*(other_cell[0] + other_cell[1]*gridWidth) + mode + offset
+            if i != j:
+                condition.append(j)
+        print("#", condition)
+        yield condition
 
 
 def gen_ncf(width, height, zones, blacks):
@@ -86,27 +102,21 @@ def gen_ncf(width, height, zones, blacks):
     
     DIMACS variable naming convention:
         Variables numbers are assigned in groups of three going across each 
-        row, top to bottom, starting from row -1.
-        3,4,5 -> 9,10,11 and 39,40,41 -> 45,46,47 : not isBallon(0,-1) and not
-        isStone(0,-1) and isBlack(0,-1) etc
-		12 : (not) isBallon(0,0)
-		13 : (not) isStone(0,0)
-		14 : (not) isBlack(0,0)
-		etc...
+        row, top to bottom, starting from row -1. Example:
 
-	    1,2,3      4,5,6   	 7,8,9 
+	        1,2,3      4,5,6     7,8,9 
          ________________________________
-        |          |          |          |		  
-        | 10,11,12 | 13,14,15 | 16,17,18 |	 
-        |__________|__________|__________|
-        |          |          |          |
-        | 19,20,21 | 22,23,24 | 25,26,27 |	 
-        |__________|__________|__________|
-        |          |          |          |
-        | 28,29,30 | 31,32,33 | 34,35,36 |
-        |__________|__________|__________|
+        |          |          |          |  In this case, 45 : isBlack(3,4)
+        | 10,11,12 | 13,14,15 | 16,17,18 |                10 : isBallon(0,0)
+        |__________|__________|__________|                11 : isStone(0,0)
+        |          |          |          |                1  : isBallon(0,-1)
+        | 19,20,21 | 22,23,24 | 25,26,27 |                12 : isBlack(0,0)
+        |__________|__________|__________| 
+        |          |          |          | 
+        | 28,29,30 | 31,32,33 | 34,35,36 | 
+        |__________|__________|__________| 
 
-	  37,38,39   40,41,42  	43,44,45
+	      37,38,39   40,41,42   43,44,45
 
     """
     ncf = []
@@ -183,6 +193,6 @@ if __name__ == "__main__":
     if len(res) > 0:
         print("Solutions:")
         for solution in res:
-            print(solution)
+            interpret_results(solution, grid["width"])
     else:
         print("No solution found.")
