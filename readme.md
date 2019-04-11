@@ -16,6 +16,7 @@ The solver is currently split in three parts: `gui.py` is the graphical grid cre
 ## To do
 
 + Test function `export DIMACS`
++ [Feature] Convert SAT to 3-SAT
 + [Feature] Merge scripts into one coherent program
 + [Feature] Add functions to import DIMACS files
 + [Feature] Add GUI to save/load grids/DIMACS files
