@@ -43,22 +43,7 @@ def make_each_positive_once(zone, gridWidth, mode):
       - mode: Determines whether to make clauses for unicitiy of balloons or
               stones. 0 => balloons, 1 => stones
     """
-    offset= gridWidth + 1
     condition = []
-<<<<<<< HEAD
-    for cell in zone:
-        # Variable's number is it's x index + it's y index times the width of
-        # the grid + the "mode" (offset numbers by +1 if making conditions for
-        # stones) + the initial numbering offset
-        i = 3*(cell[0] + cell[1]*gridWidth) + mode + offset
-        condition = [i]
-        for other_cell in zone:
-            j = -3*(other_cell[0] + other_cell[1]*gridWidth) + mode + offset
-            if i != j:
-                condition.append(j)
-        print("#", condition)
-        yield condition
-=======
     for i in range(len(zone)):
 	### Function to calculate the index of each cell in function of its x, y index and mode :
         j = 3 * gridWidth * (1 + zone[i][1]) + 1 + 3 * zone[i][0] + mode
@@ -74,7 +59,6 @@ def make_each_positive_once(zone, gridWidth, mode):
             condition.append(-l)
             condition.append(-j)
             yield condition
->>>>>>> c137e21420a3fb59e3ab079906f8dd28f70d612d
 
 
 def gen_ncf(width, height, zones, blacks):
