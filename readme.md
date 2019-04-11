@@ -15,9 +15,9 @@ The solver is currently split in three parts: `gui.py` is the graphical grid cre
 
 ## To do
 
-+ Test `gen_ncf()`
++ Test function `export DIMACS`
 + [Feature] Merge scripts into one coherent program
-+ [Feature] Add functions to export/import DIMACS files
++ [Feature] Add functions to import DIMACS files
 + [Feature] Add GUI to save/load grids/DIMACS files
 + [Feature] Undo/redo in GUI?
 
