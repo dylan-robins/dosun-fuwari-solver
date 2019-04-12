@@ -1,6 +1,7 @@
 #!venv/bin/python
 from tkinter import *
 from tkinter.ttk import *
+from os import *
 
 from grid import Grid
 
@@ -82,8 +83,9 @@ class Editor_Frame(Frame):
         print("Export the grid as a DIMACS file")
 
     def new_grid(self):
-        self.grid_forget()
-        self.master.change(Start_Frame, [])
+        global root
+        root.destroy()
+        system("python3 gui.py")
 
     def create_menu(self, root):
         menubar = Menu(root)
