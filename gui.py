@@ -2,12 +2,20 @@
 from tkinter import *
 from tkinter.ttk import *
 from os import *
+from tkinter.messagebox import *
 
 from grid import Grid
 
 def quit():
     global root
     root.destroy()
+    exit()
+
+def reset():
+    global root
+    root.destroy()
+    system("python3 gui.py")
+    exit()
 
 class Editor_Frame(Frame):
     # Variables de classe contenant les chaines statiques à afficher
@@ -19,12 +27,19 @@ class Editor_Frame(Frame):
 
     def __init__(self, grid_w, grid_h, master=None):
         """ Initialisation automatique à la création de la fenêtre principale """
-        super().__init__(master)
-        self.master = master
-        self.grid_dimensions = (grid_w, grid_h)
-        self.grid(row=0, column=0)
-        self.solvable = StringVar()
-        self.create_widgets()
+        if grid_w == 1 and grid_h == 1:
+            res = askyesno("Error", "We cannot create a 1x1 grid. Retry?", default='yes', icon='error')
+            if res:
+                reset()
+            else:
+                quit()
+        else:
+            super().__init__(master)
+            self.master = master
+            self.grid_dimensions = (grid_w, grid_h)
+            self.grid(row=0, column=0)
+            self.solvable = StringVar()
+            self.create_widgets()
         
 
     def create_widgets(self):
@@ -73,7 +88,7 @@ class Editor_Frame(Frame):
             row=2, column=0, sticky=W + E
         )
         Label(right_bar, textvariable=self.solvable, font=("Helvetica", 12)).grid(
-            row=3, column=0, sticky=S, pady=(10, 10)
+            row=4, column=0, sticky=S, pady=(10, 10)
         )
     
     def save_grid(self):
@@ -82,15 +97,10 @@ class Editor_Frame(Frame):
     def export_dimacs(self):
         print("Export the grid as a DIMACS file")
 
-    def new_grid(self):
-        global root
-        root.destroy()
-        system("python3 gui.py")
-
     def create_menu(self, root):
         menubar = Menu(root)
         fileMenu = Menu(menubar, tearoff=0)
-        fileMenu.add_command(label="New grid", command=self.new_grid)
+        fileMenu.add_command(label="New grid", command=reset)
         fileMenu.add_command(label="Save grid", command=self.save_grid)
         fileMenu.add_command(label="Export DIMACS", command=self.export_dimacs)
         fileMenu.add_separator()
@@ -160,7 +170,7 @@ class Start_Frame(Frame):
         if action == "1":
             if text in "0123456789":
                 try:
-                    return 2 <= int(value_if_allowed) <= 20
+                    return 1 <= int(value_if_allowed) <= 20
                 except ValueError:
                     return False
             else:
@@ -209,8 +219,8 @@ class Window(Tk):
         
         self.frame.grid(sticky=N+S+E+W)  # make new frame
 
-
 if __name__ == "__main__":
     # Créer une fenêtre Tk et y initialiser une fenêtre principale
     root = Window()
+    root.title('Dosun Fuwari')
     root.mainloop()
