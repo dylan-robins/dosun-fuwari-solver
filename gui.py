@@ -1,21 +1,12 @@
 #!venv/bin/python
 from tkinter import *
 from tkinter.ttk import *
-from os import *
-from tkinter.messagebox import *
 
 from grid import Grid
 
 def quit():
     global root
     root.destroy()
-    exit()
-
-def reset():
-    global root
-    root.destroy()
-    system("python3 gui.py")
-    exit()
 
 class Editor_Frame(Frame):
     # Variables de classe contenant les chaines statiques à afficher
@@ -27,33 +18,25 @@ class Editor_Frame(Frame):
 
     def __init__(self, grid_w, grid_h, master=None):
         """ Initialisation automatique à la création de la fenêtre principale """
-        if grid_w == 1 and grid_h == 1:
-            res = askyesno("Error", "We cannot create a 1x1 grid. Retry?", default='yes', icon='error')
-            if res:
-                reset()
-            else:
-                quit()
-        else:
-            super().__init__(master)
-            self.master = master
-            self.grid_dimensions = (grid_w, grid_h)
-            self.grid(row=0, column=0)
-            self.solvable = StringVar()
-            self.create_widgets()
+        super().__init__(master)
+        self.master = master
+        self.grid_dimensions = (grid_w, grid_h)
+        self.solvable = StringVar()
+        self.create_widgets()
         
 
     def create_widgets(self):
         """ Dessine la fenêtre principale """
         # Créer trois conteneurs
-        left_bar = Frame(padding=(10, 10, 10, 10))
+        left_bar = Frame(self, padding=(10, 10, 10, 10))
         left_bar.columnconfigure(0, weight=1)
         left_bar.grid(row=0, column=0, sticky=N + S + W)
 
-        mid_bar = Frame()
+        mid_bar = Frame(self)
         mid_bar.columnconfigure(0, weight=1)
         mid_bar.grid(row=0, column=1, sticky=N + S + W + E)
 
-        right_bar = Frame(padding=(10, 10, 10, 10))
+        right_bar = Frame(self, padding=(10, 10, 10, 10))
         right_bar.columnconfigure(0, weight=1)
         right_bar.grid(row=0, column=2, sticky=N + S + W)
 
@@ -71,8 +54,6 @@ class Editor_Frame(Frame):
             justify=LEFT,
         ).grid(row=1, column=0, sticky=N)
 
-        mid_bar = Frame()
-        mid_bar.grid(row=0, column=1, sticky=N + S + W + E)
         # Ajouter une nouvelle grille
         dosun_grid = Grid(self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
         dosun_grid.grid(row=0, column=1, sticky=W + E + N + S)
@@ -88,7 +69,7 @@ class Editor_Frame(Frame):
             row=2, column=0, sticky=W + E
         )
         Label(right_bar, textvariable=self.solvable, font=("Helvetica", 12)).grid(
-            row=4, column=0, sticky=S, pady=(10, 10)
+            row=3, column=0, sticky=S, pady=(10, 10)
         )
     
     def save_grid(self):
@@ -97,10 +78,14 @@ class Editor_Frame(Frame):
     def export_dimacs(self):
         print("Export the grid as a DIMACS file")
 
+    def new_grid(self):
+        self.destroy()
+        self.master.change(Start_Frame, [])
+
     def create_menu(self, root):
         menubar = Menu(root)
         fileMenu = Menu(menubar, tearoff=0)
-        fileMenu.add_command(label="New grid", command=reset)
+        fileMenu.add_command(label="New grid", command=self.new_grid)
         fileMenu.add_command(label="Save grid", command=self.save_grid)
         fileMenu.add_command(label="Export DIMACS", command=self.export_dimacs)
         fileMenu.add_separator()
@@ -170,7 +155,7 @@ class Start_Frame(Frame):
         if action == "1":
             if text in "0123456789":
                 try:
-                    return 1 <= int(value_if_allowed) <= 20
+                    return 2 <= int(value_if_allowed) <= 20
                 except ValueError:
                     return False
             else:
@@ -180,7 +165,7 @@ class Start_Frame(Frame):
 
     def start_editor(self, x, y, event=None):
         """ Lance la fenêtre principale """
-        self.grid_forget()
+        self.destroy()
         self.master.change(Editor_Frame, [x, y])
 
     def create_menu(self, root):
@@ -196,17 +181,12 @@ class Window(Tk):
     def __init__(self):
         super().__init__()
 
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-
         self.frame = Start_Frame(self)
-        self.frame.columnconfigure(0, weight=1)
-        self.frame.rowconfigure(0, weight=1)
 
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
         
-        self.frame.grid(sticky=N+S+E+W)
+        self.frame.pack(fill=BOTH, expand=1)
 
     def change(self, frame, args=None):
         if len(args) > 0:
@@ -217,10 +197,11 @@ class Window(Tk):
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
         
-        self.frame.grid(sticky=N+S+E+W)  # make new frame
+        self.frame.pack(fill=BOTH, expand=1)  # make new frame
+
 
 if __name__ == "__main__":
     # Créer une fenêtre Tk et y initialiser une fenêtre principale
     root = Window()
-    root.title('Dosun Fuwari')
+    root.resizable(False, False)
     root.mainloop()
