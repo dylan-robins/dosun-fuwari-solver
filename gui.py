@@ -155,7 +155,7 @@ class Start_Frame(Frame):
         if action == "1":
             if text in "0123456789":
                 try:
-                    return 2 <= int(value_if_allowed) <= 20
+                    return 1 <= int(value_if_allowed) <= 20
                 except ValueError:
                     return False
             else:
