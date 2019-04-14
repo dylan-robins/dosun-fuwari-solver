@@ -1,12 +1,17 @@
 #!venv/bin/python
 from tkinter import *
 from tkinter.ttk import *
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 from grid import Grid
+import file_io as fio
+from gen_formule import gen_ncf
+
 
 def quit():
     global root
     root.destroy()
+
 
 class Editor_Frame(Frame):
     # Variables de classe contenant les chaines statiques à afficher
@@ -23,7 +28,6 @@ class Editor_Frame(Frame):
         self.grid_dimensions = (grid_w, grid_h)
         self.solvable = StringVar()
         self.create_widgets()
-        
 
     def create_widgets(self):
         """ Dessine la fenêtre principale """
@@ -55,43 +59,72 @@ class Editor_Frame(Frame):
         ).grid(row=1, column=0, sticky=N)
 
         # Ajouter une nouvelle grille
-        dosun_grid = Grid(self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
-        dosun_grid.grid(row=0, column=1, sticky=W + E + N + S)
+        self.dosun_grid = Grid(
+            self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
+        self.dosun_grid.grid(row=0, column=1, sticky=W + E + N + S)
 
         # Ajouter boutons
         Button(
-            right_bar, text="Create zone from selection", command=dosun_grid.make_zone_from_selection
+            right_bar, text="Create zone from selection", command=self.dosun_grid.make_zone_from_selection
         ).grid(row=0, column=0, sticky=W + E)
         Button(
-            right_bar, text="Make selection solid", command=dosun_grid.toggle_selection_solid
+            right_bar, text="Make selection solid", command=self.dosun_grid.toggle_selection_solid
         ).grid(row=1, column=0, sticky=W + E)
-        Button(right_bar, text="Solve!", command=dosun_grid.solve).grid(
+        Button(right_bar, text="Solve!", command=self.dosun_grid.solve).grid(
             row=2, column=0, sticky=W + E
         )
         Label(right_bar, textvariable=self.solvable, font=("Helvetica", 12)).grid(
             row=3, column=0, sticky=S, pady=(10, 10)
         )
-    
+
     def save_grid(self):
-        print("Save the grid as a json file")
+        filename = asksaveasfilename(initialdir=".",
+                                     filetypes=(("JSON File", "*.json"),
+                                                ("All Files", "*.*")),
+                                     title="Choose a file."
+                                     )
+        if filename:
+            grid = self.dosun_grid.get_grid()
+            fio.save_grid(grid, filename)
 
     def export_dimacs(self):
-        print("Export the grid as a DIMACS file")
+        filename = asksaveasfilename(initialdir=".",
+                                     filetypes=(("DIMACS File", "*.cnf"),
+                                                ("All Files", "*.*")),
+                                     title="Choose a file."
+                                     )
+        if filename:
+            grid = self.dosun_grid.get_grid()
+            ncf = gen_ncf(grid["width"], grid["height"],
+                          grid["zones"], grid["blacks"])
+            fio.save_dimacs(ncf, filename)
 
     def new_grid(self):
         self.destroy()
         self.master.change(Start_Frame, [])
 
+    def open_grid(self):
+        filename = askopenfilename(initialdir=".",
+                                   filetypes=(("JSON File", "*.json"),
+                                              ("All Files", "*.*")),
+                                   title="Choose a file."
+                                   )
+        if filename:
+            grid = fio.read_grid(filename)
+            print(grid)
+
     def create_menu(self, root):
         menubar = Menu(root)
         fileMenu = Menu(menubar, tearoff=0)
         fileMenu.add_command(label="New grid", command=self.new_grid)
+        fileMenu.add_command(label="Open grid", command=self.open_grid)
         fileMenu.add_command(label="Save grid", command=self.save_grid)
         fileMenu.add_command(label="Export DIMACS", command=self.export_dimacs)
         fileMenu.add_separator()
         fileMenu.add_command(label="Quit", command=quit)
         menubar.add_cascade(label="File", menu=fileMenu)
         return menubar
+
 
 class Start_Frame(Frame):
     TITLE = "Dosun Fuwari Solver"
@@ -132,20 +165,24 @@ class Start_Frame(Frame):
 
         Label(self, text="Width:").grid(row=2, column=0)
 
-        x_entry = Entry(self, textvariable=self.x, validate="key", validatecommand=vcmd)
+        x_entry = Entry(self, textvariable=self.x,
+                        validate="key", validatecommand=vcmd)
         x_entry.grid(row=2, column=1, sticky=W + E)
 
         Label(self, text="Height:").grid(row=3, column=0)
 
-        y_entry = Entry(self, textvariable=self.y, validate="key", validatecommand=vcmd)
+        y_entry = Entry(self, textvariable=self.y,
+                        validate="key", validatecommand=vcmd)
         y_entry.grid(row=3, column=1, sticky=W + E)
 
         sub_btn = Button(
             self,
             text="Start!",
-            command=lambda: self.start_editor(int(x_entry.get()), int(y_entry.get())),
+            command=lambda: self.start_editor(
+                int(x_entry.get()), int(y_entry.get())),
         )
-        self.master.bind('<Return>', lambda e: self.start_editor(int(x_entry.get()), int(y_entry.get()), e))
+        self.master.bind('<Return>', lambda e: self.start_editor(
+            int(x_entry.get()), int(y_entry.get()), e))
         sub_btn.grid(row=2, column=3, rowspan=2)
 
     def validate(self, action, value_if_allowed, text):
@@ -167,14 +204,24 @@ class Start_Frame(Frame):
         """ Lance la fenêtre principale """
         self.destroy()
         self.master.change(Editor_Frame, [x, y])
+    
+    def open_grid(self):
+        filename = askopenfilename(initialdir=".",
+                                   filetypes=(("JSON File", "*.json"),
+                                              ("All Files", "*.*")),
+                                   title="Choose a file."
+                                   )
+        if filename:
+            grid = fio.read_grid(filename)
+            print(grid)
 
     def create_menu(self, root):
         menubar = Menu(root)
         fileMenu = Menu(menubar, tearoff=0)
+        fileMenu.add_command(label="Open grid", command=self.open_grid)
         fileMenu.add_command(label="Quit", command=quit)
         menubar.add_cascade(label="File", menu=fileMenu)
         return menubar
-
 
 
 class Window(Tk):
@@ -185,7 +232,7 @@ class Window(Tk):
 
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
-        
+
         self.frame.pack(fill=BOTH, expand=1)
 
     def change(self, frame, args=None):
@@ -193,10 +240,10 @@ class Window(Tk):
             self.frame = frame(*args, self)
         else:
             self.frame = frame(self)
-        
+
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
-        
+
         self.frame.pack(fill=BOTH, expand=1)  # make new frame
 
 

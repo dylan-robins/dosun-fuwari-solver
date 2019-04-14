@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter.ttk import *
 import pycosat as sat
-from gen_formule import gen_ncf, interpret_results
+from gen_formule import gen_ncf
 
 class Grid(Canvas):
     cell_width = 50
@@ -229,6 +229,15 @@ class Grid(Canvas):
             self.solvable_textvar.set("Solution found!")
         else:
             self.solvable_textvar.set("No solution found!")
+    
+    def get_grid(self):
+        grid = {
+            'width': self.dimensions[0],
+            'height': self.dimensions[1],
+            'zones': self.zones,
+            'blacks': self.black_cells
+        }
+        return grid
 
     def draw_solution(self, solution):
         x = 0

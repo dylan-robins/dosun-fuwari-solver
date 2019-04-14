@@ -15,12 +15,11 @@ The solver is currently split in three parts: `gui.py` is the graphical grid cre
 
 ## To do
 
-+ Test function `export DIMACS`
++ [Test] Test function `save_dimacs()`
 + [Feature] Convert SAT to 3-SAT
-+ [Feature] Merge scripts into one coherent program
-+ [Feature] Add functions to import DIMACS files
-+ [Feature] Add GUI to save/load grids/DIMACS files
-+ [Feature] Undo/redo in GUI?
++ [Feature] Add function to import DIMACS files
++ [Feature] Add `Grid` class method to open an existing grid
++ [Feature] [Optional] Undo/redo in GUI?
 
 ## Authors
 + [Dylan ROBINS](https://github.com/dylan-robins/)
