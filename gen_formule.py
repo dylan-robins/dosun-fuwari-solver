@@ -3,6 +3,30 @@ import itertools
 import file_io as fio
 import pycosat as sat
 
+def sat_3sat(ncf, height, width):
+    tab = []
+    i = 1 + 3 * (height + 2) * width    #determines the first index we can add in DIMACS
+    for clauses in ncf:
+        if len(clauses) == 1:
+            tab.append([clauses[0], i, i+1])
+            tab.append([clauses[0], i, -(i+1)])
+            tab.append([clauses[0], -i, i+1])
+            tab.append([clauses[0], -i, -(i+1)])
+            i += 2
+        elif len(clauses) == 2:
+            tab.append([clauses[0], clauses[1], i])
+            tab.append([clauses[0], clauses[1], -i])
+            i += 1
+        elif len(clauses) == 3:
+            tab.append(clauses)
+        else:
+            tab.append([clauses[0], clauses[1], i])
+            for k in range(1, len(clauses) - 3):
+                tab.append([-i, clauses[k+1], i+1])
+                i += 1
+            tab.append([-i, clauses[len(clauses) - 2], clauses[len(clauses) - 1]])
+    return tab
+
 def interpret_results(clause, gridWidth):
     x = 0
     y = 0
