@@ -27,22 +27,33 @@ def sat_3sat(ncf, height, width):
             tab.append([-i, clauses[len(clauses) - 2], clauses[len(clauses) - 1]])
     return tab
 
-def interpret_results(clause, gridWidth):
+def interpret_results(clause, gridWidth, gridHeight):
+    """
+    Print to the terminal the grid described by the clause given as argument.
+    Symbols used: B = balloon, S = stone, N = black cell (Noir), - = free cell
+    """
     x = 0
     y = 0
     i = gridWidth*3
     while i < len(clause)-gridWidth*3:
         if x >= gridWidth:
+            # print a newline and check if we've reached the end
             print("")
             x = 0
             y += 1
+            if y > gridHeight-1:
+                break
         if clause[i] > 0:
+            # print a balloon
             print("B", end=" ")
         elif clause[i+1] > 0:
+            # print a stone
             print("S", end=" ")
         elif clause[i+2] > 0:
+            # print a black (Noir) cell
             print("N", end=" ")
         else:
+            # print a free cell
             print("-", end=" ")
         i += 3
         x += 1
@@ -204,36 +215,35 @@ def gen_ncf(width, height, zones, blacks):
 
 if __name__ == "__main__":
     # Load a grid from a file and display it
-    grid = fio.read_grid("grid_2x2.json")
+    grid = fio.read_grid("grid_3x3.json")
     print("Grid:")
     print(grid)
 
     # Generate the DIMACS list associated with the grid and display the clauses
     ncf = list(gen_ncf(grid["width"], grid["height"], grid["zones"], grid["blacks"]))
     print("Clauses:")
-    for clause in ncf:
-        print(clause)
+    # for clause in ncf:
+    #     print(clause)
 	
     print("\n________________________________________________________________________________\n")
 
-    ncf3 = list(sat_3sat(ncf,grid["height"],grid["width"]))
     print("Clauses:")
-    for clause in ncf:
-        print(clause)
+    # for clause in ncf:
+    #     print(clause)
 
     # Solve the grid and display all solutions
-    res = list(sat.itersolve(ncf))
-    if len(res) > 0:
-        print("Solutions:")
-        for solution in res:
-            interpret_results(solution, grid["width"])
-    else:
-        print("No solution found.")
+    # res = list(sat.itersolve(ncf))
+    # if len(res) > 0:
+    #     print("Solutions:")
+    #     for solution in res:
+    #         interpret_results(solution, grid["width"])
+    # else:
+    #     print("No solution found.")
 
-    res = list(sat.itersolve(ncf3))
-    if len(res3) > 0:
-        print("Solutions:")
-        for solution in res3:
-            interpret_results(solution, grid["width"])
-    else:
-        print("No solution found.")
+    ncf3 = sat_3sat(ncf,grid["height"],grid["width"])
+    fio.save_dimacs(ncf3, "grid_3x3.cnf")
+    for clause in ncf3:
+        print(clause)
+    res3 = list(sat.solve(ncf3))
+    print("Solution:")
+    interpret_results(res3, grid["width"], grid["height"])

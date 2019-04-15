@@ -230,13 +230,16 @@ class Window(Tk):
         self.resizable(False, False)
 
         self.frame = Start_Frame(self)
+        self.withdraw()
 
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
         self.update_idletasks()
-        self.frame.pack(fill=BOTH, expand=1)
+        self.frame.pack(expand=1)
+        self.deiconify()
 
     def change(self, frame, args=None):
+        self.withdraw()
         if len(args) > 0:
             self.frame = frame(*args, self)
         else:
@@ -245,7 +248,8 @@ class Window(Tk):
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
         self.update_idletasks()
-        self.frame.pack(fill=BOTH, expand=1)  # make new frame
+        self.frame.pack(expand=1)  # make new frame
+        self.deiconify()
 
 
 if __name__ == "__main__":
