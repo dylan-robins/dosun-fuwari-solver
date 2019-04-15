@@ -28,16 +28,20 @@ def save_dimacs(ncf, filename):
                 tab.append(variable)
     #Ecriture dans le fichier au format DIMACS
     fichier = open(filename, "w")
-    fichier.write("c Creation du fichier DIMACS avec les clauses \n")
+    fichier.write("c Creation du fichier DIMACS avec les clauses\n")
     fichier.write("p cnf ")
     fichier.write(str(nb_variables))
     fichier.write(" ")
     fichier.write(str(nb_clauses))
     fichier.write("\n")
     for clause in ncf:
+        i = 1
         for variable in clause:
             fichier.write(str(variable))
             fichier.write(" ")
+            if i == len(clause):
+                fichier.write("0")
+            i += 1
         fichier.write("\n")
     fichier.close()
 
