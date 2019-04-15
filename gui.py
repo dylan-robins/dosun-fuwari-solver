@@ -227,12 +227,13 @@ class Start_Frame(Frame):
 class Window(Tk):
     def __init__(self):
         super().__init__()
+        self.resizable(False, False)
 
         self.frame = Start_Frame(self)
 
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
-
+        self.update_idletasks()
         self.frame.pack(fill=BOTH, expand=1)
 
     def change(self, frame, args=None):
@@ -243,12 +244,11 @@ class Window(Tk):
 
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
-
+        self.update_idletasks()
         self.frame.pack(fill=BOTH, expand=1)  # make new frame
 
 
 if __name__ == "__main__":
     # Créer une fenêtre Tk et y initialiser une fenêtre principale
     root = Window()
-    root.resizable(False, False)
     root.mainloop()

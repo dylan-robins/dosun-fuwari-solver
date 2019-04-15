@@ -216,7 +216,7 @@ if __name__ == "__main__":
 	
     print("\n________________________________________________________________________________\n")
 
-    ncf3 = list(sat_3sat(ncf,grid["height"],grid["width"])
+    ncf3 = list(sat_3sat(ncf,grid["height"],grid["width"]))
     print("Clauses:")
     for clause in ncf:
         print(clause)
