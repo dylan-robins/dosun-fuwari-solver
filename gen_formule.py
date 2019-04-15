@@ -213,12 +213,27 @@ if __name__ == "__main__":
     print("Clauses:")
     for clause in ncf:
         print(clause)
+	
+    print("\n________________________________________________________________________________\n")
+
+    ncf3 = list(sat_3sat(ncf,grid["height"],grid["width"])
+    print("Clauses:")
+    for clause in ncf:
+        print(clause)
 
     # Solve the grid and display all solutions
     res = list(sat.itersolve(ncf))
     if len(res) > 0:
         print("Solutions:")
         for solution in res:
+            interpret_results(solution, grid["width"])
+    else:
+        print("No solution found.")
+
+    res = list(sat.itersolve(ncf3))
+    if len(res3) > 0:
+        print("Solutions:")
+        for solution in res3:
             interpret_results(solution, grid["width"])
     else:
         print("No solution found.")
