@@ -2,6 +2,8 @@
 from tkinter import *
 from tkinter.ttk import *
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter.messagebox import askyesno
+from os import system
 
 from grid import Grid
 import file_io as fio
@@ -23,11 +25,22 @@ class Editor_Frame(Frame):
 
     def __init__(self, grid_w, grid_h, master=None):
         """ Initialisation automatique à la création de la fenêtre principale """
-        super().__init__(master)
-        self.master = master
-        self.grid_dimensions = (grid_w, grid_h)
-        self.solvable = StringVar()
-        self.create_widgets()
+        if grid_w == 1 and grid_h == 1:
+            res = askyesno('Error of dimensions', 'You cannot create a 1x1 grid. Do you want to retry?', default='yes', icon='error')
+            if res:
+                global root
+                root.destroy()
+                system("python3 gui.py")
+                exit()
+            else:
+                root.destroy()
+                exit()
+        else:
+            super().__init__(master)
+            self.master = master
+            self.grid_dimensions = (grid_w, grid_h)
+            self.solvable = StringVar()
+            self.create_widgets()
 
     def create_widgets(self):
         """ Dessine la fenêtre principale """
@@ -60,7 +73,7 @@ class Editor_Frame(Frame):
 
         # Ajouter une nouvelle grille
         self.dosun_grid = Grid(
-            self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
+        self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
         self.dosun_grid.grid(row=0, column=1, sticky=W + E + N + S)
 
         # Ajouter boutons
@@ -234,7 +247,6 @@ class Window(Tk):
 
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
-        self.update_idletasks()
         self.frame.pack(expand=1)
         self.deiconify()
 
