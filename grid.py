@@ -221,7 +221,7 @@ class Grid(Canvas):
         self.dtag("selected", "selected")
 
     def solve(self):
-        """ Convertit la grille en une liste au format DIMACS et la résoud"""
+        self.tag_unbind("cell", "<ButtonPress-1>")
         self.solvable_textvar.set("Looking for solution...")
         ncf = gen_ncf(self.dimensions[0], self.dimensions[1], self.zones, self.black_cells)
         solution = sat.solve(ncf)
