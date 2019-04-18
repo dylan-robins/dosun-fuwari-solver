@@ -281,4 +281,5 @@ class Window(Tk):
 if __name__ == "__main__":
     # Créer une fenêtre Tk et y initialiser une fenêtre principale
     root = Window()
+    root.title('Dosun Fuwari Solver')
     root.mainloop()
