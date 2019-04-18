@@ -2,10 +2,12 @@
 from tkinter import *
 from tkinter.ttk import *
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter.messagebox import askyesno
+from os import system
 
 from grid import Grid
 import file_io as fio
-from gen_formule import gen_ncf
+from gen_formule import gen_ncf, sat_3sat
 
 
 def quit():
@@ -23,11 +25,22 @@ class Editor_Frame(Frame):
 
     def __init__(self, grid_w, grid_h, master=None):
         """ Initialisation automatique à la création de la fenêtre principale """
-        super().__init__(master)
-        self.master = master
-        self.grid_dimensions = (grid_w, grid_h)
-        self.solvable = StringVar()
-        self.create_widgets()
+        if grid_w == 1 and grid_h == 1:
+            res = askyesno('Error of dimensions', 'You cannot create a 1x1 grid. Do you want to retry?', default='yes', icon='error')
+            if res:
+                global root
+                root.destroy()
+                system("python3 gui.py")
+                exit()
+            else:
+                root.destroy()
+                exit()
+        else:
+            super().__init__(master)
+            self.master = master
+            self.grid_dimensions = (grid_w, grid_h)
+            self.solvable = StringVar()
+            self.create_widgets()
 
     def create_widgets(self):
         """ Dessine la fenêtre principale """
@@ -60,7 +73,7 @@ class Editor_Frame(Frame):
 
         # Ajouter une nouvelle grille
         self.dosun_grid = Grid(
-            self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
+        self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
         self.dosun_grid.grid(row=0, column=1, sticky=W + E + N + S)
 
         # Ajouter boutons
@@ -87,7 +100,19 @@ class Editor_Frame(Frame):
             grid = self.dosun_grid.get_grid()
             fio.save_grid(grid, filename)
 
-    def export_dimacs(self):
+    def export_dimacsSAT(self):
+        filename = asksaveasfilename(initialdir=".",
+                                     filetypes=(("DIMACS File", "*.cnf"),
+                                                ("All Files", "*.*")),
+                                     title="Choose a file."
+                                     )
+        if filename:
+            grid = self.dosun_grid.get_grid()
+            sat = gen_ncf(grid["width"], grid["height"],
+                          grid["zones"], grid["blacks"])
+            fio.save_dimacs(sat, filename)
+
+    def export_dimacs3SAT(self):
         filename = asksaveasfilename(initialdir=".",
                                      filetypes=(("DIMACS File", "*.cnf"),
                                                 ("All Files", "*.*")),
@@ -97,7 +122,8 @@ class Editor_Frame(Frame):
             grid = self.dosun_grid.get_grid()
             ncf = gen_ncf(grid["width"], grid["height"],
                           grid["zones"], grid["blacks"])
-            fio.save_dimacs(ncf, filename)
+            tab = sat_3sat(ncf,grid["height"],grid["width"])
+            fio.save_dimacs(tab, filename)
 
     def new_grid(self):
         self.destroy()
@@ -119,7 +145,8 @@ class Editor_Frame(Frame):
         fileMenu.add_command(label="New grid", command=self.new_grid)
         fileMenu.add_command(label="Open grid", command=self.open_grid)
         fileMenu.add_command(label="Save grid", command=self.save_grid)
-        fileMenu.add_command(label="Export DIMACS", command=self.export_dimacs)
+        fileMenu.add_command(label="Export DIMACS SAT", command=self.export_dimacsSAT)
+        fileMenu.add_command(label="Export DIMACS 3SAT", command=self.export_dimacs3SAT)
         fileMenu.add_separator()
         fileMenu.add_command(label="Quit", command=quit)
         menubar.add_cascade(label="File", menu=fileMenu)
@@ -234,7 +261,6 @@ class Window(Tk):
 
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
-        self.update_idletasks()
         self.frame.pack(expand=1)
         self.deiconify()
 
@@ -255,4 +281,5 @@ class Window(Tk):
 if __name__ == "__main__":
     # Créer une fenêtre Tk et y initialiser une fenêtre principale
     root = Window()
+    root.title('Dosun Fuwari Solver')
     root.mainloop()
