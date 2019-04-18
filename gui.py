@@ -7,7 +7,7 @@ from os import system
 
 from grid import Grid
 import file_io as fio
-from gen_formule import gen_ncf
+from gen_formule import gen_ncf, sat_3sat
 
 
 def quit():
@@ -100,7 +100,19 @@ class Editor_Frame(Frame):
             grid = self.dosun_grid.get_grid()
             fio.save_grid(grid, filename)
 
-    def export_dimacs(self):
+    def export_dimacsSAT(self):
+        filename = asksaveasfilename(initialdir=".",
+                                     filetypes=(("DIMACS File", "*.cnf"),
+                                                ("All Files", "*.*")),
+                                     title="Choose a file."
+                                     )
+        if filename:
+            grid = self.dosun_grid.get_grid()
+            sat = gen_ncf(grid["width"], grid["height"],
+                          grid["zones"], grid["blacks"])
+            fio.save_dimacs(sat, filename)
+
+    def export_dimacs3SAT(self):
         filename = asksaveasfilename(initialdir=".",
                                      filetypes=(("DIMACS File", "*.cnf"),
                                                 ("All Files", "*.*")),
@@ -110,7 +122,8 @@ class Editor_Frame(Frame):
             grid = self.dosun_grid.get_grid()
             ncf = gen_ncf(grid["width"], grid["height"],
                           grid["zones"], grid["blacks"])
-            fio.save_dimacs(ncf, filename)
+            tab = sat_3sat(ncf,grid["height"],grid["width"])
+            fio.save_dimacs(tab, filename)
 
     def new_grid(self):
         self.destroy()
@@ -132,7 +145,8 @@ class Editor_Frame(Frame):
         fileMenu.add_command(label="New grid", command=self.new_grid)
         fileMenu.add_command(label="Open grid", command=self.open_grid)
         fileMenu.add_command(label="Save grid", command=self.save_grid)
-        fileMenu.add_command(label="Export DIMACS", command=self.export_dimacs)
+        fileMenu.add_command(label="Export DIMACS SAT", command=self.export_dimacsSAT)
+        fileMenu.add_command(label="Export DIMACS 3SAT", command=self.export_dimacs3SAT)
         fileMenu.add_separator()
         fileMenu.add_command(label="Quit", command=quit)
         menubar.add_cascade(label="File", menu=fileMenu)
