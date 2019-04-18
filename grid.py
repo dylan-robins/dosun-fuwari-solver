@@ -11,6 +11,7 @@ class Grid(Canvas):
         """ Initialisation automatique à la création d'une grille
             Prend en argument les dimensions x, y voulues de la grille """
         self.master = master
+
         self.dimensions = (x, y)
         self.black_cells = []
         self.zones = []
@@ -269,3 +270,25 @@ class Grid(Canvas):
                 )
             i += 3
             x += 1
+
+    def load_grid(self, zones, blacks):
+        cells = self.find_withtag("cell")
+
+        # draw the black cells: select each cell and call toggle_selection_solid()
+        for cell in blacks:
+            for id in cells:
+                tags = self.gettags(id)
+                if "x{}".format(cell[0]) in tags and "y{}".format(cell[1]) in tags:
+                    self.addtag_withtag("selected", id)
+        self.toggle_selection_solid()
+        self.dtag("selected", "selected")
+
+        # draw the zones: select the cells from each zone and call make_zone_from_selection()
+        for zone in zones:
+            for cell in zone:
+                for id in cells:
+                    tags = self.gettags(id)
+                    if "x{}".format(cell[0]) in tags and "y{}".format(cell[1]) in tags:
+                        self.addtag_withtag("selected", id)
+            self.make_zone_from_selection()
+            self.dtag("selected", "selected")

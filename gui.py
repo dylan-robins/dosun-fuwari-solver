@@ -111,7 +111,7 @@ class Editor_Frame(Frame):
                                    )
         if filename:
             grid = fio.read_grid(filename)
-            print(grid)
+            self.dosun_grid.load_grid(grid["zones"], grid["blacks"])
 
     def create_menu(self, root):
         menubar = Menu(root)
