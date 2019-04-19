@@ -30,7 +30,7 @@ class Editor_Frame(Frame):
             if res:
                 global root
                 root.destroy()
-                system("python3 test.py")
+                system("python3 gui.py")
                 exit()
             else:
                 root.destroy()
@@ -165,7 +165,7 @@ class OGrid(Frame):
             if res:
                 global root
                 root.destroy()
-                system("python3 test.py")
+                system("python3 gui.py")
                 exit()
             else:
                 root.destroy()
