@@ -3,18 +3,19 @@ from tkinter.ttk import *
 import pycosat as sat
 from gen_formule import gen_ncf
 
+
 class Grid(Canvas):
     cell_width = 50
     border_width = 4
 
-    def __init__(self, x, y, solvable_textvar, master=None):
+    def __init__(self, x, y, solvable_textvar, blacks=[], zones=[], master=None):
         """ Initialisation automatique à la création d'une grille
             Prend en argument les dimensions x, y voulues de la grille """
         self.master = master
 
         self.dimensions = (x, y)
-        self.black_cells = []
-        self.zones = []
+        self.black_cells = blacks
+        self.zones = zones
         self.solvable_textvar = solvable_textvar
         # Initialiser le canvas
         super().__init__(
@@ -24,6 +25,10 @@ class Grid(Canvas):
         )
         # Initialiser la grille
         self.draw()
+
+        # Dessiner la grille fournie (si fournie)
+        if zones != [] or blacks != []:
+            self.load_grid(zones, blacks)
 
     def draw(self):
         """ Dessiner la grille """
@@ -189,11 +194,11 @@ class Grid(Canvas):
                         self.itemconfig(border, fill="#000000")
                     else:
                         self.itemconfig(border, fill="#aaaaaa")
-            
+
             # Retirer l'item de toute autre zone
             for zone in self.zones:
                 if [x, y] in zone:
-                    zone.remove([x,y])
+                    zone.remove([x, y])
             # L'ajouter à la nouvelle zone
             self.zones[-1].append([x, y])
             # Retirer les zones vides
@@ -223,14 +228,15 @@ class Grid(Canvas):
     def solve(self):
         self.tag_unbind("cell", "<ButtonPress-1>")
         self.solvable_textvar.set("Looking for solution...")
-        ncf = gen_ncf(self.dimensions[0], self.dimensions[1], self.zones, self.black_cells)
+        ncf = gen_ncf(
+            self.dimensions[0], self.dimensions[1], self.zones, self.black_cells)
         solution = sat.solve(ncf)
         if not (solution == "UNSAT" or solution == "UNKNOWN"):
             self.draw_solution(solution)
             self.solvable_textvar.set("Solution found!")
         else:
             self.solvable_textvar.set("No solution found!")
-    
+
     def get_grid(self):
         grid = {
             'width': self.dimensions[0],
@@ -241,11 +247,13 @@ class Grid(Canvas):
         return grid
 
     def draw_solution(self, solution):
+        print(solution)
         x = 0
         y = 0
-        i = self.dimensions[1]*3
-        while i < len(solution)-self.dimensions[1]*3:
-            if x >= self.dimensions[1]:
+        i = self.dimensions[0]*3
+        while i < len(solution)-self.dimensions[0]*3:
+            print(i)
+            if x >= self.dimensions[0]:
                 x = 0
                 y += 1
             if solution[i] > 0:
@@ -253,7 +261,7 @@ class Grid(Canvas):
                 self.create_oval(
                     self.cell_width*x + 5,
                     self.cell_width*y + 5,
-                    self.cell_width*(x+1)- 5,
+                    self.cell_width*(x+1) - 5,
                     self.cell_width*(y+1) - 5,
                     fill="white",
                     width=2.0
@@ -263,7 +271,7 @@ class Grid(Canvas):
                 self.create_oval(
                     self.cell_width*x + 5,
                     self.cell_width*y + 5,
-                    self.cell_width*(x+1)- 5,
+                    self.cell_width*(x+1) - 5,
                     self.cell_width*(y+1) - 5,
                     fill="black",
                     width=2.0
@@ -278,17 +286,18 @@ class Grid(Canvas):
         for cell in blacks:
             for id in cells:
                 tags = self.gettags(id)
-                if "x{}".format(cell[0]) in tags and "y{}".format(cell[1]) in tags:
+                if ("x{}".format(cell[0]) in tags) and ("y{}".format(cell[1]) in tags):
                     self.addtag_withtag("selected", id)
         self.toggle_selection_solid()
         self.dtag("selected", "selected")
 
         # draw the zones: select the cells from each zone and call make_zone_from_selection()
-        for zone in zones:
+        for zone in list(zones):
+            # list() necessary because the order of the original list changes along the way:
+            # this forces a copy to be made: order of the iterable isn't changed.
             for cell in zone:
                 for id in cells:
                     tags = self.gettags(id)
-                    if "x{}".format(cell[0]) in tags and "y{}".format(cell[1]) in tags:
+                    if ("x{}".format(cell[0]) in tags) and ("y{}".format(cell[1]) in tags):
                         self.addtag_withtag("selected", id)
             self.make_zone_from_selection()
-            self.dtag("selected", "selected")

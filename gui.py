@@ -23,24 +23,14 @@ class Editor_Frame(Frame):
         "set it to black or to create a zone from the selection."
     )
 
-    def __init__(self, grid_w, grid_h, master=None):
+    def __init__(self, grid_w, grid_h, grid={"blacks": [], "zones": []}, master=None):
         """ Initialisation automatique à la création de la fenêtre principale """
-        if grid_w == 1 and grid_h == 1:
-            res = askyesno('Error of dimensions', 'You cannot create a 1x1 grid. Do you want to retry?', default='yes', icon='error')
-            if res:
-                global root
-                root.destroy()
-                system("python3 gui.py")
-                exit()
-            else:
-                root.destroy()
-                exit()
-        else:
-            super().__init__(master)
-            self.master = master
-            self.grid_dimensions = (grid_w, grid_h)
-            self.solvable = StringVar()
-            self.create_widgets()
+        super().__init__(master)
+        self.master = master
+        self.grid_dimensions = (grid_w, grid_h)
+        self.solvable = StringVar()
+        self.grid = grid
+        self.create_widgets()
 
     def create_widgets(self):
         """ Dessine la fenêtre principale """
@@ -73,7 +63,13 @@ class Editor_Frame(Frame):
 
         # Ajouter une nouvelle grille
         self.dosun_grid = Grid(
-        self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
+            self.grid_dimensions[0],
+            self.grid_dimensions[1],
+            self.solvable,
+            self.grid["blacks"],
+            self.grid["zones"],
+            master=mid_bar
+        )
         self.dosun_grid.grid(row=0, column=1, sticky=W + E + N + S)
 
         # Ajouter boutons
@@ -122,7 +118,7 @@ class Editor_Frame(Frame):
             grid = self.dosun_grid.get_grid()
             ncf = gen_ncf(grid["width"], grid["height"],
                           grid["zones"], grid["blacks"])
-            tab = sat_3sat(ncf,grid["height"],grid["width"])
+            tab = sat_3sat(ncf, grid["height"], grid["width"])
             fio.save_dimacs(tab, filename)
 
     def new_grid(self):
@@ -138,7 +134,8 @@ class Editor_Frame(Frame):
         if filename:
             grid = fio.read_grid(filename)
             self.destroy()
-            self.master.change(OGrid, [grid["width"], grid["height"], grid["blacks"], grid["zones"]])
+            self.master.change(
+                Editor_Frame, [grid["width"], grid["height"], grid])
 
     def create_menu(self, root):
         menubar = Menu(root)
@@ -146,134 +143,15 @@ class Editor_Frame(Frame):
         fileMenu.add_command(label="New grid", command=self.new_grid)
         fileMenu.add_command(label="Open grid", command=self.open_grid)
         fileMenu.add_command(label="Save grid", command=self.save_grid)
-        fileMenu.add_command(label="Export DIMACS SAT", command=self.export_dimacsSAT)
-        fileMenu.add_command(label="Export DIMACS 3SAT", command=self.export_dimacs3SAT)
+        fileMenu.add_command(label="Export DIMACS SAT",
+                             command=self.export_dimacsSAT)
+        fileMenu.add_command(label="Export DIMACS 3SAT",
+                             command=self.export_dimacs3SAT)
         fileMenu.add_separator()
         fileMenu.add_command(label="Quit", command=quit)
         menubar.add_cascade(label="File", menu=fileMenu)
         return menubar
 
-
-class OGrid(Frame):
-    # Variables de classe contenant les chaines statiques à afficher
-    TITLE = "Dosun Fuwari Solver"
-    
-    def __init__(self, grid_w, grid_h, blacks, zones, master=None):
-        """ Initialisation automatique à la création de la fenêtre principale """
-        if grid_w == 1 and grid_h == 1:
-            res = askyesno('Error of dimensions', 'You cannot create a 1x1 grid. Do you want to retry?', default='yes', icon='error')
-            if res:
-                global root
-                root.destroy()
-                system("python3 gui.py")
-                exit()
-            else:
-                root.destroy()
-                exit()
-        else:
-            super().__init__(master)
-            self.master = master
-            self.grid_dimensions = (grid_w, grid_h)
-            self.grid_content = (zones, blacks)
-            self.solvable = StringVar()
-            self.create_widgets()
-
-    def create_widgets(self):
-        """ Dessine la fenêtre principale """
-        # Créer trois conteneurs
-        left_bar = Frame(self, padding=(10, 10, 10, 10))
-        left_bar.columnconfigure(0, weight=1)
-        left_bar.grid(row=0, column=0, sticky=N + S + W)
-
-        mid_bar = Frame(self)
-        mid_bar.columnconfigure(0, weight=1)
-        mid_bar.grid(row=0, column=1, sticky=N + S + W + E)
-
-        right_bar = Frame(self, padding=(10, 10, 10, 10))
-        right_bar.columnconfigure(0, weight=1)
-        right_bar.grid(row=0, column=2, sticky=N + S + W)
-
-        # Ajouter deux zones de texte dans la barre de gauche
-        Label(left_bar, text=self.TITLE, font=("Helvetica", 16), padding=(0, 0, 0, 10)).grid(
-            row=0, column=0, sticky=N
-        )
-
-        # Ajouter une nouvelle grille
-        self.dosun_grid = Grid(
-        self.grid_dimensions[0], self.grid_dimensions[1], self.solvable, mid_bar)
-        self.dosun_grid.grid(row=0, column=1, sticky=W + E + N + S)
-        self.dosun_grid.load_grid(self.grid_content[0], self.grid_content[1])
-
-        # Ajouter boutons
-        Button(right_bar, text="Solve!", command=self.dosun_grid.solve).grid(
-            row=0, column=0, sticky=W + E
-        )
-        Label(right_bar, textvariable=self.solvable, font=("Helvetica", 12)).grid(
-            row=1, column=0, sticky=S, pady=(10, 10)
-        )
-
-    def save_grid(self):
-        filename = asksaveasfilename(initialdir=".",
-                                     filetypes=(("JSON File", "*.json"),
-                                                ("All Files", "*.*")),
-                                     title="Choose a file."
-                                     )
-        if filename:
-            grid = self.dosun_grid.get_grid()
-            fio.save_grid(grid, filename)
-
-    def export_dimacsSAT(self):
-        filename = asksaveasfilename(initialdir=".",
-                                     filetypes=(("DIMACS File", "*.cnf"),
-                                                ("All Files", "*.*")),
-                                     title="Choose a file."
-                                     )
-        if filename:
-            grid = self.dosun_grid.get_grid()
-            sat = gen_ncf(grid["width"], grid["height"],
-                          grid["zones"], grid["blacks"])
-            fio.save_dimacs(sat, filename)
-
-    def export_dimacs3SAT(self):
-        filename = asksaveasfilename(initialdir=".",
-                                     filetypes=(("DIMACS File", "*.cnf"),
-                                                ("All Files", "*.*")),
-                                     title="Choose a file."
-                                     )
-        if filename:
-            grid = self.dosun_grid.get_grid()
-            ncf = gen_ncf(grid["width"], grid["height"],
-                          grid["zones"], grid["blacks"])
-            tab = sat_3sat(ncf,grid["height"],grid["width"])
-            fio.save_dimacs(tab, filename)
-
-    def new_grid(self):
-        self.destroy()
-        self.master.change(Start_Frame, [])
-
-    def open_grid(self):
-        filename = askopenfilename(initialdir=".",
-                                   filetypes=(("JSON File", "*.json"),
-                                              ("All Files", "*.*")),
-                                   title="Choose a file."
-                                   )
-        if filename:
-            grid = fio.read_grid(filename)
-            self.destroy()
-            self.master.change(OGrid, [grid["width"], grid["height"], grid["blacks"], grid["zones"]])
-
-    def create_menu(self, root):
-        menubar = Menu(root)
-        fileMenu = Menu(menubar, tearoff=0)
-        fileMenu.add_command(label="New grid", command=self.new_grid)
-        fileMenu.add_command(label="Open grid", command=self.open_grid)
-        fileMenu.add_command(label="Save grid", command=self.save_grid)
-        fileMenu.add_command(label="Export DIMACS SAT", command=self.export_dimacsSAT)
-        fileMenu.add_command(label="Export DIMACS 3SAT", command=self.export_dimacs3SAT)
-        fileMenu.add_separator()
-        fileMenu.add_command(label="Quit", command=quit)
-        menubar.add_cascade(label="File", menu=fileMenu)
-        return menubar
 
 class Start_Frame(Frame):
     TITLE = "Dosun Fuwari Solver"
@@ -353,7 +231,7 @@ class Start_Frame(Frame):
         """ Lance la fenêtre principale """
         self.destroy()
         self.master.change(Editor_Frame, [x, y])
-    
+
     def open_grid(self):
         filename = askopenfilename(initialdir=".",
                                    filetypes=(("JSON File", "*.json"),
@@ -363,7 +241,9 @@ class Start_Frame(Frame):
         if filename:
             grid = fio.read_grid(filename)
             self.destroy()
-            self.master.change(OGrid, [grid["width"], grid["height"], grid["blacks"], grid["zones"]])
+            self.master.change(
+                Editor_Frame, [grid["width"], grid["height"], grid]
+            )
 
     def create_menu(self, root):
         menubar = Menu(root)
@@ -390,9 +270,9 @@ class Window(Tk):
     def change(self, frame, args=None):
         self.withdraw()
         if len(args) > 0:
-            self.frame = frame(*args, self)
+            self.frame = frame(*args, master=self)
         else:
-            self.frame = frame(self)
+            self.frame = frame(master=self)
 
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
