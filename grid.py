@@ -44,8 +44,8 @@ class Grid(Canvas):
                     width=0.0,
                     tags="cell x" + str(x) + " y" + str(y),
                 )
-        # Assigner à chaque cellule l'action add_selected_tag
-        self.tag_bind("cell", "<ButtonPress-1>", self.add_selected_tag)
+        # Assigner à chaque cellule l'action toggle_selected_tag
+        self.tag_bind("cell", "<ButtonPress-1>", self.toggle_selected_tag)
 
         # Dessiner les bordures horizontales
         for y in range(self.dimensions[1] + 1):
@@ -72,11 +72,35 @@ class Grid(Canvas):
                     tags="border vertical x" + str(x) + " y" + str(y),
                 )
 
-    def add_selected_tag(self, event):
-        """ Ajoute l'élement cliqué à la sélection, ou vide la sélection 
-            pour en créer une nouvelle avec juste l'élement cliqué """
-        # Désélectionner l'élément cliqué
+    def find_selected_neighbours(self, cell, found):
+        """
+        Find selected neighbours and each of their selected neighbours etc...
+        """
+        tags = self.gettags(cell)
+        if "selected" in tags:
+            found.add(cell)
+            x = int(tags[1][1:])
+            y = int(tags[2][1:])
+            neighbours = self.find_neighbours(x,y)
+            for ncell in neighbours:
+                if neighbours[ncell] not in found:
+                    for u in self.find_selected_neighbours(neighbours[ncell], found):
+                        found.add(u)
+        return found
+
+    def toggle_selected_tag(self, event):
+        """
+        Adds the cell the user clicked on to the selection. If clicked cell
+        was already selected, deselects it. If deseletion splits the selected
+        area into multiple parts, then deselects everything. Selected cells
+        have the "selected" tag and are colored #b3e5fc (light blue). 
+        """
         tags = self.gettags("current")
+        # Find clicked cell's coordinates
+        x = int(tags[1][1:])
+        y = int(tags[2][1:])
+
+        # If current cell was already selected, deselect it
         if "selected" in tags:
             self.dtag("current", "selected")
             if ("solid" in tags):
@@ -84,24 +108,35 @@ class Grid(Canvas):
             else:
                 self.itemconfig("current", fill="#ffffff")
 
-        # Créer une sélection à partir de l'élement cliqué
+            # If selection has been split, then deselect everything.
+            selection = self.find_withtag("selected")
+            # If selection isn't empty, find all selected cells that share a
+            # border with the 1st selected cell. If the two sets are different,
+            # then the selection has been split
+            if len(selection) > 0:
+                selection_contiguous = self.find_selected_neighbours(selection[0], set())
+                if set(selection) != selection_contiguous:
+                    self.itemconfig("selected", fill="#ffffff")
+                    self.itemconfig("solid", fill="#000000")
+                    self.dtag("selected", "selected")
+
+        # Add current cell to selection
         else:
-            # Trouver ses coordonnées
-            x = int(tags[1][1:])
-            y = int(tags[2][1:])
-            # Trouver si un de ses voisins est sélectionné
+            # check if neighbouring cells are in the current selection
             neighbours = self.find_neighbours(x, y)
-            has_neighbour = False
+            has_selected_neighbour = False
             for cell in neighbours:
                 if "selected" in self.gettags(neighbours[cell]):
-                    has_neighbour = True
+                    has_selected_neighbour = True
                     break
-            # S'il n'y a pas de voisins sélectionnés, vider la sélection
-            if not has_neighbour:
+            
+            # If not, deselect everything
+            if not has_selected_neighbour:
                 self.itemconfig("selected", fill="#ffffff")
                 self.itemconfig("solid", fill="#000000")
                 self.dtag("selected", "selected")
-            # Ajouter la cellule sélectionnée à la (nouvelle) sélection
+            
+            # Add current cell to selection
             self.addtag_withtag("selected", "current")
             self.itemconfig("selected", fill="#b3e5fc")
 
@@ -247,12 +282,10 @@ class Grid(Canvas):
         return grid
 
     def draw_solution(self, solution):
-        print(solution)
         x = 0
         y = 0
         i = self.dimensions[0]*3
         while i < len(solution)-self.dimensions[0]*3:
-            print(i)
             if x >= self.dimensions[0]:
                 x = 0
                 y += 1
