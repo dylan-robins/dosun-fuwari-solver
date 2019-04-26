@@ -1,7 +1,8 @@
 from tkinter import *
 from tkinter.ttk import *
 import pycosat as sat
-from gen_formule import gen_ncf
+
+from lib.gen_formule import gen_cnf
 
 
 class Grid(Canvas):
@@ -263,9 +264,9 @@ class Grid(Canvas):
     def solve(self):
         self.tag_unbind("cell", "<ButtonPress-1>")
         self.solvable_textvar.set("Looking for solution...")
-        ncf = gen_ncf(
+        cnf = gen_cnf(
             self.dimensions[0], self.dimensions[1], self.zones, self.black_cells)
-        solution = sat.solve(ncf)
+        solution = sat.solve(cnf)
         if not (solution == "UNSAT" or solution == "UNKNOWN"):
             self.draw_solution(solution)
             self.solvable_textvar.set("Solution found!")

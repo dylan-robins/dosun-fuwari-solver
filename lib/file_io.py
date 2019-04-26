@@ -12,14 +12,14 @@ def read_grid(path):
         grid = json.loads(in_file.read())
     return grid
 
-def save_dimacs(ncf, filename):
+def save_dimacs(cnf, filename):
     #Initialisation des compteurs du nombre de clause et du nombre de variables de la formule
     nb_clauses = 0
     nb_variables = 0
     #Initialisation d'une liste pour chercher le nombre de variables de la formule
     tab=[]
     #Pour chaques clauses incrementer le compteur du nombre de clauses
-    for clause in ncf:
+    for clause in cnf:
         nb_clauses+=1
         #Pour chaque variable, si elle n'est pas dans tab, incrementer le compteur du nombre de variable et l'ajouter dans tab
         for variable in clause:
@@ -34,7 +34,7 @@ def save_dimacs(ncf, filename):
     fichier.write(" ")
     fichier.write(str(nb_clauses))
     fichier.write("\n")
-    for clause in ncf:
+    for clause in cnf:
         i = 1
         for variable in clause:
             fichier.write(str(variable))

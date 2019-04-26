@@ -1,12 +1,13 @@
 #!venv/bin/python
 import itertools
-import file_io as fio
 import pycosat as sat
 
-def sat_3sat(ncf, height, width):
+import lib.file_io as fio
+
+def sat_3sat(cnf, height, width):
     tab = []
     i = 1 + 3 * (height + 2) * width    #determines the first index we can add in DIMACS
-    for clauses in ncf:
+    for clauses in cnf:
         if len(clauses) == 1:
             tab.append([clauses[0], i, i+1])
             tab.append([clauses[0], i, -(i+1)])
@@ -25,40 +26,7 @@ def sat_3sat(ncf, height, width):
                 tab.append([-i, clauses[k+1], i+1])
                 i += 1
             tab.append([-i, clauses[len(clauses) - 2], clauses[len(clauses) - 1]])
-    return tab
-
-def interpret_results(clause, gridWidth, gridHeight):
-    """
-    Print to the terminal the grid described by the clause given as argument.
-    Symbols used: B = balloon, S = stone, N = black cell (Noir), - = free cell
-    """
-    x = 0
-    y = 0
-    i = gridWidth*3
-    while i < len(clause)-gridWidth*3:
-        if x >= gridWidth:
-            # print a newline and check if we've reached the end
-            print("")
-            x = 0
-            y += 1
-            if y > gridHeight-1:
-                break
-        if clause[i] > 0:
-            # print a balloon
-            print("B", end=" ")
-        elif clause[i+1] > 0:
-            # print a stone
-            print("S", end=" ")
-        elif clause[i+2] > 0:
-            # print a black (Noir) cell
-            print("N", end=" ")
-        else:
-            # print a free cell
-            print("-", end=" ")
-        i += 3
-        x += 1
-    print("\n________________________________________________________________________________\n")
-    
+    return tab    
 
 def make_each_positive_once(zone, gridWidth, mode):
     """
@@ -96,7 +64,7 @@ def make_each_positive_once(zone, gridWidth, mode):
             yield condition
 
 
-def gen_ncf(width, height, zones, blacks):
+def gen_cnf(width, height, zones, blacks):
     """
     Generates the normal conjuntive form giving the satisfiability of a given
     dosun fuwari grid. Output format is a pycosat-compliant DIMACS list.
@@ -156,35 +124,35 @@ def gen_ncf(width, height, zones, blacks):
 	      37,38,39   40,41,42   43,44,45
 
     """
-    ncf = []
+    cnf = []
 	# Clauses for cells outside of grid (above and below)
     step = 3
     # Cells above
     for i in range(1, 1 + 3 * width - 1, step):
-        ncf.append([-i])     # cells above the grid can hold a ballon
-        ncf.append([-(i+1)]) # cells above the grid can hold a stone
-        ncf.append([i+2])    # cells above the grid are considered black
+        cnf.append([-i])     # cells above the grid can hold a ballon
+        cnf.append([-(i+1)]) # cells above the grid can hold a stone
+        cnf.append([i+2])    # cells above the grid are considered black
     # Below
     for i in range(3*width*height+3*width+1, 3*width*height+3*width+1+3*width-1, step):
-        ncf.append([-i])     # cells below the grid can hold a ballon
-        ncf.append([-(i+1)]) # cells below the grid can hold a stone
-        ncf.append([i+2])    # cells below the grid are considered black
+        cnf.append([-i])     # cells below the grid can hold a ballon
+        cnf.append([-(i+1)]) # cells below the grid can hold a stone
+        cnf.append([i+2])    # cells below the grid are considered black
 
 	# Add clauses pertaining to the black cells
     i = 1 + 3 * width
     for y in range(height):
         for x in range(width):
             if [x,y] in blacks:
-                ncf.append([i+2])    # (x,y) is black
-                ncf.append([-i])     # (x,y) can't hold a balloon
-                ncf.append([-(i+1)]) # (x,y) can't hold a stone
+                cnf.append([i+2])    # (x,y) is black
+                cnf.append([-i])     # (x,y) can't hold a balloon
+                cnf.append([-(i+1)]) # (x,y) can't hold a stone
             else:
-                ncf.append([-(i+2)]) # (x,y) isn't black
+                cnf.append([-(i+2)]) # (x,y) isn't black
             i += 3
 
 	# A cell can't simultaneously hold a balloon and a stone
     for i in range(1 + 3 * width, 3 * width * height + 3 * width + 1,3):
-        ncf.append([-i, -(i+1)])     # not(isBalloon and isStone) = not isBalloon or not isStone
+        cnf.append([-i, -(i+1)])     # not(isBalloon and isStone) = not isBalloon or not isStone
 
     # isStone positional conditions
     # End on row height-1 since bottom row is always resting on the bottom of
@@ -193,7 +161,7 @@ def gen_ncf(width, height, zones, blacks):
     for _ in range(0, height - 1):
         for _ in range(0, width):
             # not isStone(x,y) or isStone(x,y+1) or isBlack(x,y+1)
-            ncf.append([-(i+1), (i+1) + 3 * width, (i+1) + 3 * width + 1])
+            cnf.append([-(i+1), (i+1) + 3 * width, (i+1) + 3 * width + 1])
             i += 3  # go to next cell
     # isBalloon positional conditions
     # Start on row 1 since top row is always resting against top of grid
@@ -201,49 +169,14 @@ def gen_ncf(width, height, zones, blacks):
     for _ in range(0, height - 1):	#I changed i and 1st for because otherwise it creates conditions for the top of the grid but not for the bot of it and it's not what we wanted. Now, it create for the bot but not for the top
         for _ in range(0, width):
             # not isBalloon(x,y) or isBalloon(x,y-1) or isBlack(x,y-1)
-            ncf.append([-i, i - 3 * width, i - 3 * width + 2])
+            cnf.append([-i, i - 3 * width, i - 3 * width + 2])
             i += 3  # go to next cell
     # Zone unicity conditions
     for zone in zones:
         # Each cell could be a balloon
         for clause in (make_each_positive_once(zone, width, 0)):
-            ncf.append(list(clause))
+            cnf.append(list(clause))
 	# Each cell could be a stone
         for clause in (make_each_positive_once(zone, width, 1)):
-            ncf.append(list(clause))
-    return ncf
-
-if __name__ == "__main__":
-    # Load a grid from a file and display it
-    grid = fio.read_grid("grid_3x3.json")
-    print("Grid:")
-    print(grid)
-
-    # Generate the DIMACS list associated with the grid and display the clauses
-    ncf = list(gen_ncf(grid["width"], grid["height"], grid["zones"], grid["blacks"]))
-    print("Clauses:")
-    # for clause in ncf:
-    #     print(clause)
-	
-    print("\n________________________________________________________________________________\n")
-
-    print("Clauses:")
-    # for clause in ncf:
-    #     print(clause)
-
-    # Solve the grid and display all solutions
-    # res = list(sat.itersolve(ncf))
-    # if len(res) > 0:
-    #     print("Solutions:")
-    #     for solution in res:
-    #         interpret_results(solution, grid["width"])
-    # else:
-    #     print("No solution found.")
-
-    ncf3 = sat_3sat(ncf,grid["height"],grid["width"])
-    fio.save_dimacs(ncf3, "grid_3x3.cnf")
-    for clause in ncf3:
-        print(clause)
-    res3 = list(sat.solve(ncf3))
-    print("Solution:")
-    interpret_results(res3, grid["width"], grid["height"])
+            cnf.append(list(clause))
+    return cnf

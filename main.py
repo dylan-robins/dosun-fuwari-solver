@@ -5,9 +5,9 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.messagebox import askyesno
 from os import system
 
-from grid import Grid
-import file_io as fio
-from gen_formule import gen_ncf, sat_3sat
+from lib.grid import Grid
+import lib.file_io as fio
+from lib.gen_formule import gen_cnf, sat_3sat
 
 
 def quit():
@@ -104,7 +104,7 @@ class Editor_Frame(Frame):
                                      )
         if filename:
             grid = self.dosun_grid.get_grid()
-            sat = gen_ncf(grid["width"], grid["height"],
+            sat = gen_cnf(grid["width"], grid["height"],
                           grid["zones"], grid["blacks"])
             fio.save_dimacs(sat, filename)
 
@@ -116,9 +116,9 @@ class Editor_Frame(Frame):
                                      )
         if filename:
             grid = self.dosun_grid.get_grid()
-            ncf = gen_ncf(grid["width"], grid["height"],
+            cnf = gen_cnf(grid["width"], grid["height"],
                           grid["zones"], grid["blacks"])
-            tab = sat_3sat(ncf, grid["height"], grid["width"])
+            tab = sat_3sat(cnf, grid["height"], grid["width"])
             fio.save_dimacs(tab, filename)
 
     def new_grid(self):
@@ -279,7 +279,6 @@ class Window(Tk):
         self.update_idletasks()
         self.frame.pack(expand=1)  # make new frame
         self.deiconify()
-
 
 if __name__ == "__main__":
     # Créer une fenêtre Tk et y initialiser une fenêtre principale
