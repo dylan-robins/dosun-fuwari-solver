@@ -23,7 +23,7 @@ This program allows you to enter a grid and generate a solution.
 
 To run the program (after having installed the dependencies), simply run  
 ```sh
-python3 gui.py
+python3 main.py
 ```
 
 You'll see the following screen:  
@@ -55,10 +55,11 @@ The *File* menu offers several useful options:
 
 ## Program structure
 
-+ `gui.py`: main GUI classes. Run this file to run the program.
-+ `grid.py`: contains the Grid class.
-+ `gen_formule.py`: contains the functions that generate the cnf formula that's passed to the satsolver.
-+ `file_io.py`: contains the function used to import/export files in and out of the program.
++ `main.py`: Main program. Run this file to run the graphical interface.
++ `display_sat_results.py`: Commandline utility script that displays the output of a satsolver as a grid (text). Currently supports minisat and picosat output files.
++ `lib/grid.py`: contains the Grid class.
++ `lib/gen_formule.py`: contains the functions that generate the cnf formula that's passed to the satsolver.
++ `lib/file_io.py`: contains the functions used to import/export files in and out of the program.
 
 ## To do
 
