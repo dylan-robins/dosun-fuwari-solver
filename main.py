@@ -51,7 +51,7 @@ class Editor_Frame(Frame):
         "set it to black or to create a zone from the selection."
     )
 
-    def __init__(self, grid_w, grid_h, grid={"blacks": [], "zones": []}, master=None):
+    def __init__(self, grid_w, grid_h, grid, master=None):
         """
         Initialisation automatique à la création de la fenêtre d'édition.
         Arguments:
@@ -329,7 +329,7 @@ class Start_Frame(Frame):
         grille de la taille choisie par l'utilisateur
         """
         self.destroy()
-        self.master.change(Editor_Frame, [x, y])
+        self.master.change(Editor_Frame, [x, y, {"blacks": [], "zones": []}])
 
     def open_grid(self):
         """

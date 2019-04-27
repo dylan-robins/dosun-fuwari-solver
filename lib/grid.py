@@ -1,9 +1,7 @@
-from tkinter import *
-from tkinter.ttk import *
+from tkinter import Canvas
 import pycosat as sat
 
 from lib.gen_formule import gen_cnf, sat_3sat
-
 
 class Grid(Canvas):
     """
@@ -34,6 +32,7 @@ class Grid(Canvas):
         self.black_cells = blacks
         self.zones = zones
         self.solvable_textvar = solvable_textvar
+
         # Initialiser le canvas
         super().__init__(
             master,
@@ -61,7 +60,9 @@ class Grid(Canvas):
                     (y + 1) * self.cell_width,
                     fill="white",
                     width=0.0,
-                    tags="cell x" + str(x) + " y" + str(y),
+                    tags="cell x" + str(x) + " y" + str(y) + " blank",
+                    # le tag "blank" sert à vérifier à la fin que toutes les
+                    # cases soient soit dans une zone, soit noires
                 )
         # Assigner à chaque case l'action toggle_selected_tag
         self.tag_bind("cell", "<ButtonPress-1>", self.toggle_selected_tag)
@@ -219,6 +220,9 @@ class Grid(Canvas):
         """
         Créé une zone à partir de la sélection courante.
         """
+        # Commencer par enlever le tag "blank" à toutes les cases sélectionnées
+        self.dtag("selected", "blank")
+
         # Trouver les cases sélectionnées
         selection = self.find_withtag("selected")
         borders = self.find_withtag("border")
@@ -312,24 +316,32 @@ class Grid(Canvas):
                 self.black_cells.remove([int(tags[1][1:]), int(tags[2][1:])])
                 self.dtag(cell, "solid")
                 self.itemconfig(cell, fill="#ffffff")
+                self.addtag_withtag("blank", cell) # lui remettre le tag "blank"
             else:
                 # Sinon la rendre solide
+                self.dtag(cell, "blank") # lui retirer le tag "blank"
                 self.black_cells.append([int(tags[1][1:]), int(tags[2][1:])])
                 self.addtag_withtag("solid", cell)
                 self.itemconfig(cell, fill="#000000")
+
         # Tout déselectionner
         self.dtag("selected", "selected")
 
     def solve(self):
         """
         Résoudre la grille, dessiner la solution et afficher le résultat dans
-        le champs de texte prévu pour.
+        le champs de texte prévu pour. 
         """
         # Rendre la grille non modifiable une fois qu'elle a été résolue
         self.tag_unbind("cell", "<ButtonPress-1>")
         # Afficher un message des fois que la recherche d'une solution mette
         # un peu de temps
         self.solvable_textvar.set("Looking for solution...")
+        # rendre solides toutes les cases qui ne sont pas dans une zone ou solides
+        self.dtag("selected", "selected")
+        self.addtag_withtag("selected", "blank")
+        self.toggle_selection_solid()
+
         # Générer les clauses
         cnf = gen_cnf(
             self.dimensions[0], self.dimensions[1], self.zones, self.black_cells
