@@ -91,7 +91,7 @@ if __name__ == "__main__":
         satisfiability = content.split("\n", 1)[0]
         solutions = content.split("\n", 1)[1]
 
-        if satisfiability == "SAT\n":
+        if satisfiability == "SAT":
             solutions = solutions.split("\n")
             # se débarasser de potentielles listes vides causées par le split qui agit en fin de ligne
             solutions = [line for line in solutions if line != ""]
