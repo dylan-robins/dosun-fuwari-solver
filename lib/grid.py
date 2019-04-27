@@ -10,6 +10,8 @@ class Grid(Canvas):
 
     cell_width = 50
     border_width = 4
+    border_colour = "#afafaf"
+    selection_colour = "#b3e5fc"
 
     def __init__(self, x, y, solvable_textvar, blacks=[], zones=[], master=None):
         """
@@ -75,7 +77,7 @@ class Grid(Canvas):
                     y * self.cell_width,
                     (x + 1) * self.cell_width + 2 * self.border_width,
                     y * self.cell_width + self.border_width,
-                    fill="#aaaaaa",
+                    fill=self.border_colour,
                     width=0.0,
                     tags="border horizontal x" + str(x) + " y" + str(y),
                 )
@@ -87,21 +89,21 @@ class Grid(Canvas):
                     y * self.cell_width,
                     x * self.cell_width + self.border_width,
                     (y + 1) * self.cell_width + self.border_width,
-                    fill="#aaaaaa",
+                    fill=self.border_colour,
                     width=0.0,
                     tags="border vertical x" + str(x) + " y" + str(y),
                 )
 
-    def find_selected_neighbours(self, cell, found=set()):
+    def find_selected_neighbours(self, cell, found):
         """
         Trouver les voisins sélectionnés de la case donnée en argument,
         ainsi que les voisins sélectionnés de chacun d'entre eux etc
         récursivement.
         Arguments:
           - cell: case à partir de laquelle on cherche les voisins
-          - found (optionnel): ensemble des voisins connus. Nécessaire pour ne
-                               pas revenir en arrière lors de la récursion.
-                               Initialement devrait être vide.
+          - found: ensemble des voisins connus. Nécessaire pour ne
+                   pas revenir en arrière lors de la récursion.
+                   Initialement devrait être vide.
         """
         # vérifier que cell est bien sélectionnée
         tags = self.gettags(cell)
@@ -126,7 +128,6 @@ class Grid(Canvas):
         la case était déjà sélectionnée, on la déselectionne à la place. Si
         la déselectionner couperait la sélection en deux zones séparées, on
         désélectionne tout (par sécurité).
-        Les cases sélectionnées sont colorées en bleu clair (#b3e5fc).
         """
         # Trouver les coordonnées de la case cliquée
         tags = self.gettags("current")
@@ -149,13 +150,12 @@ class Grid(Canvas):
             # la sélection. Si les deux ensembles ne sont pas égaux, alors
             # la sélection a été coupée
             # sélection entière
-
-            # Si la sélection est vide ca sert à rien
             selection = self.find_withtag("selected")
+            # Si la sélection est vide ca sert à rien
             if len(selection) > 0:
                 # partie de la sélection en contact avec le 1e élement de la
                 # liste précédente
-                selection_contiguous = self.find_selected_neighbours(selection[0])
+                selection_contiguous = self.find_selected_neighbours(selection[0], set())
                 # si les deux ensembles sont différents, tout désélectionner
                 if set(selection) != selection_contiguous:
                     self.itemconfig("selected", fill="#ffffff")
@@ -181,7 +181,7 @@ class Grid(Canvas):
 
             # Sélectionner la case et la colorer en bleu
             self.addtag_withtag("selected", "current")
-            self.itemconfig("selected", fill="#b3e5fc")
+            self.itemconfig("selected", fill=self.selection_colour)
 
     def find_neighbours(self, x, y):
         """

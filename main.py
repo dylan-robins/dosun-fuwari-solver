@@ -57,8 +57,8 @@ class Editor_Frame(Frame):
         Arguments:
           - grid_w: width of the grid
           - grid_h: height of the grid
-          - grid (optional): dict containing a list of black cells and a list
-                             of zones. Format: {"blacks": [], "zones": []}
+          - grid: dict containing a list of default black cells and a list of
+                  zones. Format: {"blacks": [], "zones": []}
           - master (optional): parent Tk frame
         """
         super().__init__(master)
