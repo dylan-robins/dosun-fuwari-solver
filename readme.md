@@ -2,7 +2,7 @@
 
 Un programme en python qui résout des grilles de Dosun Fuwari pour vous.
 
-## Dependances
+## Dépendances
 
 Pour faire fonctionner ce programme, vous allez avoir besoin de :
 - Python(Version supérieure à 3.6)
@@ -14,7 +14,7 @@ Pour faire fonctionner ce programme, vous allez avoir besoin de :
 L'objectif du Dosun Fuwari est de placer des ballons (cercles blancs) et des pierres (cercles noirs) dans une grille suivant les règles suivantes :
 1. Placer un ballon et une pierre dans chaque zone entourée par des lignes en gras.
 2. Les ballons sont légers et flottent, ils doivent donc être placés dans une cellule du haut, ou dans une cellule juste en dessous d'une cellule noire (cellule solide) ou en dessous d'un autre ballon.
-3. Les pierres sont solides et coulent, elles doivent alores être placées dans une cellule du bas, ou dans une cellule au dessus d'une cellule noire ou encore au dessus d'une autre pierre.
+3. Les pierres sont solides et coulent, elles doivent alors être placées dans une cellule du bas, ou dans une cellule au-dessus d'une cellule noire ou encore au-dessus d'une autre pierre.
 
 Ce programme permet d'entrer une grille et de générer une solution
 
@@ -22,10 +22,10 @@ Ce programme permet d'entrer une grille et de générer une solution
 + Ligne de commande :
 
 Création des clauses SAT : 
-python3 json-2-sat.py <grille.json>, cela créé dans le repértoire où est la grille un .cnf
+python3 json-2-sat.py <grille.json>, cela créé dans le répertoire où est la grille un .cnf
   
 Création des clauses 3-SAT : 
-python3 json-2-3sat.py <grille.json>, cela créé dans le repértoire où est la grille un .cnf
+python3 json-2-3sat.py <grille.json>, cela créé dans le répertoire où est la grille un .cnf
   
 Résoudre une grille avec picosat : 
 picosat <grille.cnf> --all | python3 display_sat_results.py picosat <grille.json>
@@ -48,16 +48,16 @@ C'est la fenêtre de départ. Vous pouvez y spécifier les dimensions de la gril
 Supposons que vous avez initialisé une grille vide de dimensions 3x3 et cliqué sur le bouton "Start!". Vous devriez voir apparaitre ceci :  
 ![Editor - intial state](img/Editor_Frame_init.png)  
 Sur la gauche vous avez un petit texte d'aide, au centre il y a la grille et sur la droite la liste des actions.  
-Pour selectionner une cellule, il suffit de cliquer dessus avec la souris. Les cellules selectionnées sont surlignées en bleu:  
+Pour sélectionner une cellule, il suffit de cliquer dessus avec la souris. Les cellules sélectionnées sont surlignées en bleu:  
 ![Editor - selection](img/Editor_Frame_selection.png)  
-Pour déselectionner une cellule, un clic gauche suffit. Seules les cellules côtes à côtes peuvent être sélectionnées simultanément : si vous sélectionnez une cellule qui ne partage pas une bordure avec une cellule déjà selectionnée, la selection précédente sera perdue.
+Pour désélectionner une cellule, un clic gauche suffit. Seules les cellules côtes à côtes peuvent être sélectionnées simultanément : si vous sélectionnez une cellule qui ne partage pas une bordure avec une cellule déjà sélectionnée, la sélection précédente sera perdue.
 
-Les cellules sélectionnées peuvent être transformées en une zone (voir règle 1) en cliquand sur le bouton "Create zone from selection" à droite de la grille. Cette selection peut également devenir solide (noir) ou vide (blanc) en cliquant sur "Make selection solid".  
+Les cellules sélectionnées peuvent être transformées en une zone (voir règle 1) en cliquant sur le bouton "Create zone from selection" à droite de la grille. Cette sélection peut également devenir solide (noir) ou vide (blanc) en cliquant sur "Make selection solid".  
 Voici une grille composée de 3 zones et une cellule solide :  
 ![Editor - example grid](img/Editor_Frame_example_grid.png)  
 Veuillez noter qu'une cellule solide ne peut pas être dans une zone.
 
-Une fois que vous avez entré la grille, cliquez sur "Solve!" pour utiliser le programme qui résout la grille. Si une solution est trouvée, le texte "Solution found!" va apparaitre en dessous du bouton "Solve!" et la solution sera supperposée sur la grille. Si aucune solution ne peut être trouvée, le texte "No solution found!" apparaitra.
+Une fois que vous avez entré la grille, cliquez sur "Solve!" pour utiliser le programme qui résout la grille. Si une solution est trouvée, le texte "Solution found!" va apparaitre en dessous du bouton "Solve!" et la solution sera superposée à la grille. Si aucune solution ne peut être trouvée, le texte "No solution found!" apparaitra.
 
 Grille satisfaisable :  
 ![Editor - satisfiable grid](img/Editor_Frame_sat.png)
@@ -70,16 +70,16 @@ Le menu "File" offre différentes options :
 - **Open grid** permet d'ouvrir une grille existante enregistrée sur votre ordinateur. Les grilles sont enregistrées au format JSON.
 - **Save grid** permet de sauvegarder une grille en un fichier JSON.
 - **Export DIMACS SAT** permet d'exporter un fichier cnf décrivant la satisfaisabilité de votre grille. Cela permet de résoudre votre grille en utilisant un satsolver autonome.
-- **Export DIMACS 3SAT** fait la même chose que précedemment, à la seule exception près que cela exporte la version 3-SAT réduite de la formule de satisfaisabilité.
+- **Export DIMACS 3SAT** fait la même chose que précédemment, à la seule exception près que cela exporte la version 3-SAT réduite de la formule de satisfaisabilité.
 
 ## Structure du programme
-- `main.py`: Programme principal. Executez ce fichier pour lancer l'interface graphique
+- `main.py`: Programme principal. Exécutez ce fichier pour lancer l'interface graphique
 - `display_sat_results.py`: Outil de ligne de commande qui affiche le résultat d'un satsolver sous forme de grille résolue de Dosun-Fuwari. Prend en charge les sorties de minisat et de picosat.
 - `json-2-sat.py`: Outil de ligne de commande qui génère le fichier .cnf au format DIMACS décrivant la satisfaisabilité d'une grille donnée en argument.
 - `json-2-3sat.py`: Pareil que ci-dessus, mais réduit les clauses de satisfaisabilité en des clauses 3-SAT.
 - `lib/grid.py` : contient la classe de la grille.
-- `lib/gen_formule.py` : contient les fonctions qui générent la formule cnf qui est donnée au satsolver.
-- `lib/file_io.py`: : contient les fonctions utilisée pour importer/exporter les fichiers dans/en dehors du programme.
+- `lib/gen_formule.py` : contient les fonctions qui génèrent la formule cnf qui est donnée au satsolver.
+- `lib/file_io.py`: : contient les fonctions utilisées pour importer/exporter les fichiers dans/en dehors du programme.
 
 ## Auteurs
 Dylan ROBINS
@@ -87,4 +87,4 @@ Lucas DREZET
 Louis WADBLED
 
 ## Licence
-Ce projet est sous licence MIT - voir le fichier LICENCE pour plus de détails. 
+Ce projet est sous licence MIT - voir le fichier LICENCE pour plus de détails.
