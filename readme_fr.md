@@ -31,7 +31,7 @@ Résoudre une grille avec picosat :
 picosat <grille.cnf> --all | python3 display_sat_results.py picosat <grille.json>
 
 Résoudre une grille avec minisat : 
-minisat <grille.cnf> tmp.txt
+minisat <grille.cnf> tmp.txt ;
 python3 display_sat_results.py minisat <grille.json> tmp.txt
 
 + Interface graphique :
