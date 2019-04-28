@@ -24,13 +24,13 @@ Ce programme permet d'entrer une grille et de générer une solution
   + Création des clauses SAT : 
 python3 json-2-sat.py <grille.json>, cela créé dans le repértoire où est la grille un .cnf
   
-++ Création des clauses 3-SAT : 
+  + Création des clauses 3-SAT : 
 python3 json-2-3sat.py <grille.json>, cela créé dans le repértoire où est la grille un .cnf
   
-++ Résoudre une grille avec picosat : 
+  + Résoudre une grille avec picosat : 
 picosat <grille.cnf> --all | python3 display_sat_results.py picosat <grille.json>
 
-++ Résoudre une grille avec minisat : 
+  + Résoudre une grille avec minisat : 
 minisat <grille.cnf> tmp.txt
 python3 display_sat_results.py minisat <grille.json> tmp.txt
 
