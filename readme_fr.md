@@ -19,6 +19,22 @@ L'objectif du Dosun Fuwari est de placer des ballons (cercles blancs) et des pie
 Ce programme permet d'entrer une grille et de générer une solution
 
 ## Utilisation
+Ligne de commande :
+
+Création des clauses SAT : 
+python3 json-2-sat.py <grille.json>, cela créé dans le repértoire où est la grille un .cnf
+  
+Création des clauses 3-SAT : 
+python3 json-2-3sat.py <grille.json>, cela créé dans le repértoire où est la grille un .cnf
+  
+Résoudre une grille avec picosat : 
+picosat <grille.cnf> --all | python3 display_sat_results.py picosat <grille.json>
+
+Résoudre une grille avec minisat : 
+minisat <grille.cnf> tmp.txt
+python3 display_sat_results.py minisat <grille.json> tmp.txt
+
+Interface graphique :
 
 Pour faire fonctionner le programme (après avoir installé les dépendances), il suffit d'utiliser la commande :
 ```sh
