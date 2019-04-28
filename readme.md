@@ -22,23 +22,13 @@ This program allows you to enter a grid and generate a solution.
 ## Usage
 + Command line :
 
-Creation of SAT clauses: 
+Creation of SAT clauses: python3 json-2-sat.py <grid.json>, this creates in the directory where the grid is a .cnf
 
-python3 json-2-sat.py <grid.json>, this creates in the directory where the grid is a .cnf
+Creation of 3-SAT clauses: python3 json-2-3sat.py <grid.json>, this creates in the directory where the grid is a .cnf
 
-Creation of 3-SAT clauses: 
+Solving a grid with picosat: picosat <grid.cnf> --all | python3 display_sat_results.py picosat <grid.json>
 
-python3 json-2-3sat.py <grid.json>, this creates in the directory where the grid is a .cnf
-
-Solving a grid with picosat: 
-
-picosat <grid.cnf> --all | python3 display_sat_results.py picosat <grid.json>
-
-Solving a grid with minisat: 
-
-minisat <grid.cnf> tmp.txt
-
-python3 display_sat_results.py minisat <grid.json> tmp.txt
+Solving a grid with minisat: minisat <grid.cnf> tmp.txt AND python3 display_sat_results.py minisat <grid.json> tmp.txt
 
 + Graphical interface :
 
