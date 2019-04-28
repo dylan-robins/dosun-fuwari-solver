@@ -46,21 +46,26 @@ def sat_3sat(cnf, height, width):
 
 def make_each_positive_once(zone, gridWidth, mode):
     """
-    Make clauses determining the unicity of balloons or stones in a given
-    zone: each cell could be a ballon/stone, but there can be two of them.
-    Output is a list similar to a pycosat-compliant DIMACS list, except it's
-    elements are seperated by ORs instead of ANDs.
-    Arguments:
-      - zone: list of cells in zone
-              Format:
-              [
-                  [x1,y1],
-                  [x2,y2],
-                  [x3,y3],
-                  ...
-              ]
-      - mode: Determines whether to make clauses for unicitiy of balloons or
-              stones. 0 => balloons, 1 => stones
+    Pour chaque zone, on considère dans la première clause que chaques cases peuvent être un ballon (respectivement une pierre).
+    Dans les clauses suivantes, on prend la négation du ième élément (compris entre le premier et l'avant-dernier), et on le distribue
+    à chaque élément compris entre le ième+1 élément et le dernier en les mettant en négation et à chaque fois dans une nouvelle clause.
+    
+    Exemple :
+    Zone = {(2,0), (2,1), (2,2)}}
+    Clauses : 
+    [B(2,0) + B(2,1) + B(2,2)] • 
+    [-B(2,0) + -B(2,1)] • [-B(2,0) + -B(2,2)] •    <= le premier élément de la clause du dessus est B(2,0).
+                                                      On prend donc sa négation puis la distribue sur chaque élément suivant
+						      en les mettant dans une nouvelle clause.
+    [-B(2,1) + -B(2,2)] •                          <= le second élément (et avant dernier) est B(2,1).
+                                                      On prend sa négation puis la distribue sur la négation de l'élément suivant
+						      qui est dans ce cas le dernier.
+    
+    [P(2,0) + P(2,1) + P(2,2)] •                   <= même principe mais pour les pierres.
+    [-P(2,0) + -P(2,1)] • [-P(2,0) + -P(2,2)] • 
+    [-P(2,1) + -P(2,2)] •
+    
+    Ce procédé est le même pour n'importe quelle taille de la première clause.
     """
     condition = []
     for i in range(len(zone)):
