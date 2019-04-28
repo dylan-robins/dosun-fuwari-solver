@@ -59,14 +59,11 @@ Le menu "File" offre différentes options :
 ## Structure du programme
 - `main.py`: Programme principal. Executez ce fichier pour lancer l'interface graphique
 - `display_sat_results.py`: Outil de ligne de commande qui affiche le résultat d'un satsolver sous forme de grille résolue de Dosun-Fuwari. Prend en charge les sorties de minisat et de picosat.
+- `json-2-sat.py`: Outil de ligne de commande qui génère le fichier .cnf au format DIMACS décrivant la satisfaisabilité d'une grille donnée en argument.
+- `json-2-3sat.py`: Pareil que ci-dessus, mais réduit les clauses de satisfaisabilité en des clauses 3-SAT.
 - `lib/grid.py` : contient la classe de la grille.
 - `lib/gen_formule.py` : contient les fonctions qui générent la formule cnf qui est donnée au satsolver.
 - `lib/file_io.py`: : contient les fonctions utilisée pour importer/exporter les fichiers dans/en dehors du programme.
-
-## A réaliser
-- [Fonctionnalité] Ajouter la fonction d'import de fichier DIMACS
-- [Fonctionnalité] [Optionnel] Annuler/Refaire dans GUI ?
-- [Fonctionnalité] [Optionnel] Ajouter une interface ligne de commande ?
 
 ## Auteurs
 Dylan ROBINS

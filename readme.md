@@ -57,15 +57,11 @@ The *File* menu offers several useful options:
 
 + `main.py`: Main program. Run this file to run the graphical interface.
 + `display_sat_results.py`: Commandline utility script that displays the output of a satsolver as a grid (text). Currently supports minisat and picosat output files.
++ `json-2-sat.py`: Commandline utility script that generates the DIMACS .cnf file that describes the satifiability of a given grid.
++ `json-2-3sat.py`: Same as above, but reduces the satisfiability clauses to 3-SAT.
 + `lib/grid.py`: contains the Grid class.
 + `lib/gen_formule.py`: contains the functions that generate the cnf formula that's passed to the satsolver.
 + `lib/file_io.py`: contains the functions used to import/export files in and out of the program.
-
-## To do
-
-+ [Feature] Add function to import DIMACS files
-+ [Feature] [Optional] Undo/redo in GUI?
-+ [Feature] [Optional] Add command-line interface?
 
 ## Authors
 + [Dylan ROBINS](https://github.com/dylan-robins/)
