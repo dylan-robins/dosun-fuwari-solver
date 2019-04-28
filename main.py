@@ -367,15 +367,16 @@ class Window(Tk):
         Initialisation automatique de l'instance
         """
         super().__init__()
+
+        # cacher la fenêtre, dessiner la fenêtre et le menu, puis re-afficher
+        # la fenêtre
+        self.withdraw()
+
         # Empêcher le redimentionnement de la fenêtre
         self.resizable(False, False)
 
         # Charger la fenêtre initiale
         self.frame = Start_Frame(self)
-
-        # cacher la fenêtre, dessiner la fenêtre et le menu, puis re-afficher
-        # la fenêtre
-        self.withdraw()
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
         self.frame.pack(expand=1)
@@ -389,14 +390,14 @@ class Window(Tk):
           - args: liste des arguments à fournir à la classe lors de son
                   instanciation
         """
+        # cacher la fenêtre, dessiner la nouvelle fenêtre et le menu, puis
+        # re-afficher la fenêtre
+        self.withdraw()
         # instancier la nouvelle fenêtre avec les bons arguments
         if len(args) > 0:
             self.frame = frame(*args, master=self)
         else:
             self.frame = frame(master=self)
-        # cacher la fenêtre, dessiner la nouvelle fenêtre et le menu, puis
-        # re-afficher la fenêtre
-        self.withdraw()
         menubar = self.frame.create_menu(self)
         self.configure(menu=menubar)
         self.update_idletasks()  # vérifier que la fenêtre a bien été mise à jour
