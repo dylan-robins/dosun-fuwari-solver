@@ -28,7 +28,7 @@ Creation of 3-SAT clauses: python3 json-2-3sat.py <grid.json>, this creates in t
 
 Solving a grid with picosat: picosat <grid.cnf> --all | python3 display_sat_results.py picosat <grid.json>
 
-Solving a grid with minisat: minisat <grid.cnf> tmp.txt AND python3 display_sat_results.py minisat <grid.json> tmp.txt
+Solving a grid with minisat: minisat <grid.cnf> tmp.txt ; python3 display_sat_results.py minisat <grid.json> tmp.txt
 
 + Graphical interface :
 
