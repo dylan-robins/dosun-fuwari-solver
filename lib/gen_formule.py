@@ -67,22 +67,25 @@ def make_each_positive_once(zone, gridWidth, mode):
     
     Ce procédé est le même pour n'importe quelle taille de la première clause.
     """
-    condition = []
+    clause = []
+    # chaque case pourrait être le ballon
     for i in range(len(zone)):
-        ### Function to calculate the index of each cell in function of its x, y index and mode :
         j = 3 * gridWidth * (1 + zone[i][1]) + 1 + 3 * zone[i][0] + mode
-        ###
-        condition.append(j)
-    yield condition
-    # negation
+        clause.append(j)
+    yield clause
+
+    # si la case de l est le ballon, alors les cases dea k ne peuvent pas
+    # l'être, et ce pour tout k > l
     for i in range(len(zone) - 1):
+        # l est positif
         l = 3 * gridWidth * (1 + zone[i][1]) + 1 + 3 * zone[i][0] + mode
+        # chaque k est négatif
         for k in range(i + 1, len(zone)):
-            condition = []
+            clause = []
             j = 3 * gridWidth * (1 + zone[k][1]) + 1 + 3 * zone[k][0] + mode
-            condition.append(-l)
-            condition.append(-j)
-            yield condition
+            clause.append(-l)
+            clause.append(-j)
+            yield clause
 
 
 def gen_cnf(width, height, zones, blacks):

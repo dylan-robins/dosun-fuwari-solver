@@ -55,11 +55,11 @@ class Editor_Frame(Frame):
         """
         Initialisation automatique à la création de la fenêtre d'édition.
         Arguments:
-          - grid_w: width of the grid
-          - grid_h: height of the grid
-          - grid: dict containing a list of default black cells and a list of
-                  zones. Format: {"blacks": [], "zones": []}
-          - master (optional): parent Tk frame
+          - grid_w: largeur de la grille
+          - grid_h: hauteur de la grille
+          - grid: dictionnaire contenant la liste des cases noires et la liste
+                  des zones de la grille. Format: {"blacks": [], "zones": []}
+          - master (optional): objet Tk parent
         """
         super().__init__(master)
         # assigner les variables d'instance
