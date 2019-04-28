@@ -21,7 +21,7 @@ Ce programme permet d'entrer une grille et de générer une solution
 ## Utilisation
 + Ligne de commande :
 
-++ Création des clauses SAT : 
+  + Création des clauses SAT : 
 python3 json-2-sat.py <grille.json>, cela créé dans le repértoire où est la grille un .cnf
   
 ++ Création des clauses 3-SAT : 
