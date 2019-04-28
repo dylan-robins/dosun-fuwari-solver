@@ -116,7 +116,7 @@ if __name__ == "__main__":
         if satisfiability == "s SATISFIABLE":
             # supprimer les lignes qui séparent les solutions
             solutions = content.replace("s SATISFIABLE\n", "")
-            solutions = solutions.split("s SOLUTIONS 3", 1)[
+            solutions = solutions.split("s SOLUTIONS ", 1)[
                 0
             ]  # se débarasser du nombre de solutions
             solutions = solutions.replace(
