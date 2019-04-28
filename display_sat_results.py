@@ -130,6 +130,7 @@ if __name__ == "__main__":
             solutions = [line for line in solutions if line != ""]
             # convertir la solution (chaine de caractères) en liste d'entiers
             solutions = [list(map(int, line.split(" "))) for line in solutions]
+            print("S : stone\nB : balloon\nN : black cell\n- : empty cell\n")
             print("{} solutions found:".format(len(solutions)))
         else:
             print("No solutions found")
